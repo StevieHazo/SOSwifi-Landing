@@ -26,7 +26,7 @@
       color: #FF6A1A;
     }
 
-    /* Gold Card Styling */
+    /* Gold Card */
     .gold-card {
       border-color: #FF6A1A;
       box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.18);
@@ -37,24 +37,14 @@
       color: #111827;
     }
 
-    /* Logo Animation */
+    /* Lifebuoy subtle pulse */
     .lifebuoy {
-      animation: beaconPulse 3s ease-in-out infinite;
+      animation: beaconPulse 4s ease-in-out infinite;
     }
 
     @keyframes beaconPulse {
       0%, 100% { filter: drop-shadow(0 0 15px #FF6A1A); }
       50% { filter: drop-shadow(0 0 35px #FF6A1A); }
-    }
-
-    .wifi-signal {
-      animation: signalWave 2.5s linear infinite;
-    }
-
-    @keyframes signalWave {
-      0% { opacity: 0.4; transform: scale(0.7); }
-      50% { opacity: 1; transform: scale(1.15); }
-      100% { opacity: 0.4; transform: scale(0.7); }
     }
   </style>
 </head>
@@ -62,26 +52,25 @@
 <body class="text-white min-h-screen">
   <div class="max-w-lg mx-auto px-5 pt-8 pb-12">
 
-    <!-- Logo -->
-    <div class="flex justify-center mb-8">
-      <div class="flex items-center gap-x-4">
-        <!-- SOS with Lifebuoy -->
-        <div class="flex items-center text-[4.5rem] font-black tracking-[-5px]">
-          <span class="text-[#FF6A1A]">S</span>
-          <span class="relative mx-2">
-            <span class="lifebuoy text-8xl">🛟</span>
-          </span>
-          <span class="text-[#FF6A1A]">S</span>
-        </div>
+    <!-- Logo: SOS on top, Wi-Fi underneath -->
+    <div class="flex flex-col items-center mb-10">
+      <!-- SOS with Lifebuoy -->
+      <div class="flex items-center text-[4.8rem] font-black tracking-[-6px]">
+        <span class="text-[#FF6A1A]">S</span>
+        <span class="relative mx-3">
+          <span class="lifebuoy text-8xl">🛟</span>
+        </span>
+        <span class="text-[#FF6A1A]">S</span>
+      </div>
 
-        <!-- WiFi with animated signals -->
-        <div class="flex flex-col items-center -mt-2">
-          <span class="text-5xl font-bold tracking-tighter text-white">Wi‑Fi</span>
-          <div class="flex gap-1 mt-1">
-            <div class="wifi-signal w-2 h-5 bg-cyan-400 rounded-full"></div>
-            <div class="wifi-signal w-2 h-7 bg-cyan-400 rounded-full" style="animation-delay: 0.3s"></div>
-            <div class="wifi-signal w-2 h-9 bg-cyan-400 rounded-full" style="animation-delay: 0.6s"></div>
-          </div>
+      <!-- Wi-Fi underneath -->
+      <div class="flex flex-col items-center -mt-3">
+        <span class="text-5xl font-bold tracking-tighter text-white">Wi‑Fi</span>
+        <!-- Subtle WiFi signal lines -->
+        <div class="flex gap-1 mt-1">
+          <div class="w-2 h-5 bg-cyan-400 rounded-full"></div>
+          <div class="w-2 h-7 bg-cyan-400 rounded-full"></div>
+          <div class="w-2 h-9 bg-cyan-400 rounded-full"></div>
         </div>
       </div>
     </div>
