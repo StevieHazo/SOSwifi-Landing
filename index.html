@@ -37,14 +37,14 @@
       color: #111827;
     }
 
-    /* Lifebuoy subtle pulse */
+    /* Lifebuoy gentle pulse */
     .lifebuoy {
       animation: beaconPulse 4s ease-in-out infinite;
     }
 
     @keyframes beaconPulse {
       0%, 100% { filter: drop-shadow(0 0 15px #FF6A1A); }
-      50% { filter: drop-shadow(0 0 35px #FF6A1A); }
+      50% { filter: drop-shadow(0 0 32px #FF6A1A); }
     }
   </style>
 </head>
@@ -52,26 +52,20 @@
 <body class="text-white min-h-screen">
   <div class="max-w-lg mx-auto px-5 pt-8 pb-12">
 
-    <!-- Logo: SOS on top, Wi-Fi underneath -->
+    <!-- Logo: SOS with closer S's + Wi-Fi underneath -->
     <div class="flex flex-col items-center mb-10">
-      <!-- SOS with Lifebuoy -->
-      <div class="flex items-center text-[4.8rem] font-black tracking-[-6px]">
+      <!-- SOS -->
+      <div class="flex items-center text-[4.6rem] font-black tracking-[-8px]">
         <span class="text-[#FF6A1A]">S</span>
-        <span class="relative mx-3">
+        <span class="relative mx-1">
           <span class="lifebuoy text-8xl">🛟</span>
         </span>
         <span class="text-[#FF6A1A]">S</span>
       </div>
 
       <!-- Wi-Fi underneath -->
-      <div class="flex flex-col items-center -mt-3">
-        <span class="text-5xl font-bold tracking-tighter text-white">Wi‑Fi</span>
-        <!-- Subtle WiFi signal lines -->
-        <div class="flex gap-1 mt-1">
-          <div class="w-2 h-5 bg-cyan-400 rounded-full"></div>
-          <div class="w-2 h-7 bg-cyan-400 rounded-full"></div>
-          <div class="w-2 h-9 bg-cyan-400 rounded-full"></div>
-        </div>
+      <div class="text-5xl font-bold tracking-tighter text-white -mt-3">
+        Wi‑Fi
       </div>
     </div>
 
