@@ -37,6 +37,15 @@
       color: #111827;
     }
 
+    /* Logo Container with rounded border */
+    .logo-container {
+      border: 3px solid #FF6A1A;
+      border-radius: 28px;
+      padding: 16px 32px;
+      box-shadow: 0 0 30px rgba(255, 106, 26, 0.3);
+      background: rgba(255, 106, 26, 0.05);
+    }
+
     /* Lifebuoy pulse */
     .lifebuoy {
       animation: beaconPulse 4s ease-in-out infinite;
@@ -52,20 +61,22 @@
 <body class="text-white min-h-screen">
   <div class="max-w-lg mx-auto px-5 pt-8 pb-12">
 
-    <!-- Logo: SOS on top, Wi-Fi tight underneath -->
-    <div class="flex flex-col items-center mb-10">
-      <!-- SOS with Lifebuoy (S's closer) -->
-      <div class="flex items-center text-[4.6rem] font-black tracking-[-7px]">
-        <span class="text-[#FF6A1A]">S</span>
-        <span class="relative mx-1.5">
-          <span class="lifebuoy text-8xl">🛟</span>
-        </span>
-        <span class="text-[#FF6A1A]">S</span>
-      </div>
+    <!-- Logo with rounded rectangular border -->
+    <div class="flex justify-center mb-10">
+      <div class="logo-container flex flex-col items-center">
+        <!-- SOS -->
+        <div class="flex items-center text-[4.5rem] font-black tracking-[-7px]">
+          <span class="text-[#FF6A1A]">S</span>
+          <span class="relative mx-2">
+            <span class="lifebuoy text-8xl">🛟</span>
+          </span>
+          <span class="text-[#FF6A1A]">S</span>
+        </div>
 
-      <!-- Wi-Fi tight underneath -->
-      <div class="text-5xl font-bold tracking-tighter text-white -mt-4">
-        Wi‑Fi
+        <!-- Wi-Fi tight underneath -->
+        <div class="text-5xl font-bold tracking-tighter text-white -mt-3">
+          Wi‑Fi
+        </div>
       </div>
     </div>
 
