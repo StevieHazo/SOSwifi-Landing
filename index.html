@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap');
 
     body {
       font-family: 'Inter', sans-serif;
@@ -46,28 +46,35 @@
       0%, 100% { filter: drop-shadow(0 0 15px #FF6A1A); }
       50% { filter: drop-shadow(0 0 35px #FF6A1A); }
     }
+
+    /* Modern Futuristic Wi-Fi Text */
+    .wifi-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: -2px;
+      font-size: 2.25rem;
+      line-height: 1;
+    }
   </style>
 </head>
 
 <body class="text-white min-h-screen">
   <div class="max-w-lg mx-auto px-5 pt-8 pb-12">
 
-    <!-- Logo with rounded rectangular border -->
-    <div class="flex justify-center mb-10">
-      <div class="logo-container flex flex-col items-center" style="border: 3px solid #FF6A1A; border-radius: 28px; padding: 16px 32px; box-shadow: 0 0 30px rgba(255, 106, 26, 0.3); background: rgba(255, 106, 26, 0.05);">
-        <!-- SOS -->
-        <div class="flex items-center text-[4.5rem] font-black tracking-[-7px]">
-          <span class="text-[#FF6A1A]">S</span>
-          <span class="relative mx-2">
-            <span class="lifebuoy text-8xl">🛟</span>
-          </span>
-          <span class="text-[#FF6A1A]">S</span>
-        </div>
+    <!-- Logo: SOS + tight modern Wi-Fi underneath -->
+    <div class="flex flex-col items-center mb-10">
+      <!-- SOS with Lifebuoy -->
+      <div class="flex items-center text-[4.6rem] font-black tracking-[-7px]">
+        <span class="text-[#FF6A1A]">S</span>
+        <span class="relative mx-2">
+          <span class="lifebuoy text-8xl">🛟</span>
+        </span>
+        <span class="text-[#FF6A1A]">S</span>
+      </div>
 
-        <!-- Wi-Fi tight underneath -->
-        <div class="text-5xl font-bold tracking-tighter text-white -mt-3">
-          Wi‑Fi
-        </div>
+      <!-- Modern Wi-Fi underneath -->
+      <div class="wifi-text text-white tracking-[-1px] mt-1">
+        Wi‑Fi
       </div>
     </div>
 
@@ -134,7 +141,7 @@
       </div>
 
       <!-- Economy £5 -->
-      <div class="relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border-2 border-orange-500/50">
+      <div class="bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border border-orange-500/30 hover:border-orange-500/50 transition-colors">
         <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-black text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
           BUDGET OPTION
         </div>
@@ -181,7 +188,7 @@
       </div>
 
       <!-- Deluxe £20 -->
-      <div class="relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border-2 border-orange-500/50">
+      <div class="bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border border-orange-500/30 hover:border-orange-500/50 transition-colors">
         <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-black text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
           PREMIUM SERVICE
         </div>
