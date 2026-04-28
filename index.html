@@ -26,14 +26,13 @@
       color: #FF6A1A;
     }
 
-    /* Consistent Card Style */
+    /* All pricing cards get strong orange border */
     .pricing-card {
       border: 2px solid #FF6A1A;
       box-shadow: 0 0 0 3px rgba(255, 106, 26, 0.15);
     }
 
     .gold-card {
-      border-color: #FF6A1A;
       box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25);
     }
 
@@ -42,7 +41,6 @@
       color: #111827;
     }
 
-    /* Lifebuoy pulse */
     .lifebuoy {
       animation: beaconPulse 4s ease-in-out infinite;
     }
@@ -52,7 +50,6 @@
       50% { filter: drop-shadow(0 0 35px #FF6A1A); }
     }
 
-    /* Wide space-age Wi-Fi */
     .wifi-text {
       font-family: 'Exo 2', sans-serif;
       font-weight: 700;
@@ -65,7 +62,7 @@
 </head>
 
 <body class="text-white min-h-screen">
-  <div class="max-w-lg mx-auto px-5 pt-6 pb-12">   <!-- Reduced top padding -->
+  <div class="max-w-lg mx-auto px-5 pt-6 pb-12">
 
     <!-- Logo -->
     <div class="flex flex-col items-center mb-8">
@@ -81,7 +78,7 @@
 
     <!-- Hero -->
     <div class="text-center mb-10">
-      <p class="lifeline font-semibold tracking-[3px] text-xl mb-3">
+      <p class="lifeline font-semibold tracking-[3px] text-[22px] mb-3">
         YOUR INTERNET LIFELINE
       </p>
       <div class="inline-flex items-center gap-3 text-zinc-400 text-base font-medium">
@@ -95,7 +92,7 @@
     <div class="space-y-8">
 
       <!-- Gold £10 -->
-      <div class="gold-card relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 pricing-card">
+      <div class="gold-card pricing-card relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8">
         <div class="badge absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold px-8 py-1.5 rounded-3xl shadow-xl">
           MOST POPULAR
         </div>
@@ -106,7 +103,6 @@
           <div class="text-zinc-400">15 Mbps • 20 minutes</div>
         </div>
 
-        <!-- features + icons remain the same as before -->
         <div class="flex gap-6">
           <div class="flex-1">
             <ul class="space-y-5 text-zinc-200 text-[15.5px]">
@@ -115,7 +111,6 @@
               <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> Multiple devices</li>
             </ul>
           </div>
-          <!-- payment icons + secure text (same as previous) -->
           <div class="w-24 flex-shrink-0">
             <div class="bg-zinc-800/70 rounded-2xl p-3 mb-4">
               <div class="grid grid-cols-2 gap-3 text-3xl text-zinc-300">
@@ -141,9 +136,95 @@
         </a>
       </div>
 
-      <!-- Economy and Deluxe cards follow the same pattern with "pricing-card" class and their respective badges -->
+      <!-- Economy £5 -->
+      <div class="pricing-card relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8">
+        <div class="badge absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
+          BUDGET OPTION
+        </div>
 
-      <!-- (Economy £5 and Deluxe £20 cards with same structure as Gold but adjusted badge text and price) -->
+        <div class="text-center mb-8">
+          <div class="text-[#FF6A1A] font-semibold tracking-widest text-sm mb-1">ECONOMY</div>
+          <div class="text-6xl font-bold text-white mb-1">£5</div>
+          <div class="text-zinc-400">5 Mbps • 20 minutes</div>
+        </div>
+
+        <div class="flex gap-6">
+          <div class="flex-1">
+            <ul class="space-y-5 text-zinc-200 text-[15.5px]">
+              <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> Browsing & social media</li>
+              <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> Email & Messaging</li>
+              <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> WhatsApp, Instagram, TikTok</li>
+            </ul>
+          </div>
+          <div class="w-24 flex-shrink-0">
+            <div class="bg-zinc-800/70 rounded-2xl p-3 mb-4">
+              <div class="grid grid-cols-2 gap-3 text-3xl text-zinc-300">
+                <i class="fa-brands fa-cc-visa"></i>
+                <i class="fa-brands fa-cc-mastercard"></i>
+                <i class="fa-brands fa-apple-pay"></i>
+                <i class="fa-brands fa-google-pay"></i>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center gap-1.5 text-[10px] text-zinc-500">
+                <i class="fa-solid fa-lock text-[#FF6A1A]"></i>
+                <span class="font-medium">Secure checkout</span>
+              </div>
+              <div class="text-[10px] text-zinc-500 mt-0.5">via Stripe</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://buy.stripe.com/fZu6oHefPg5acFYcpJ1gs01" target="_blank"
+           class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
+          <i class="fa-solid fa-lock mr-2"></i>Pay £5 now • Secure
+        </a>
+      </div>
+
+      <!-- Deluxe £20 -->
+      <div class="pricing-card relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8">
+        <div class="badge absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
+          PREMIUM SERVICE
+        </div>
+
+        <div class="text-center mb-8">
+          <div class="text-[#FF6A1A] font-semibold tracking-widest text-sm mb-1">DELUXE</div>
+          <div class="text-6xl font-bold text-white mb-1">£20</div>
+          <div class="text-zinc-400">25 Mbps • 20 minutes</div>
+        </div>
+
+        <div class="flex gap-6">
+          <div class="flex-1">
+            <ul class="space-y-5 text-zinc-200 text-[15.5px]">
+              <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> Ultra-fast 4K & uploads</li>
+              <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> IPTV streaming</li>
+              <li class="flex items-start gap-3"><span class="tick mt-0.5 text-2xl leading-none">✔</span> Best for busy events</li>
+            </ul>
+          </div>
+          <div class="w-24 flex-shrink-0">
+            <div class="bg-zinc-800/70 rounded-2xl p-3 mb-4">
+              <div class="grid grid-cols-2 gap-3 text-3xl text-zinc-300">
+                <i class="fa-brands fa-cc-visa"></i>
+                <i class="fa-brands fa-cc-mastercard"></i>
+                <i class="fa-brands fa-apple-pay"></i>
+                <i class="fa-brands fa-google-pay"></i>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center gap-1.5 text-[10px] text-zinc-500">
+                <i class="fa-solid fa-lock text-[#FF6A1A]"></i>
+                <span class="font-medium">Secure checkout</span>
+              </div>
+              <div class="text-[10px] text-zinc-500 mt-0.5">via Stripe</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://buy.stripe.com/fZudR97Rr7yEeO6cpJ1gs02" target="_blank"
+           class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
+          <i class="fa-solid fa-lock mr-2"></i>Pay £20 now • Secure
+        </a>
+      </div>
 
     </div>
 
