@@ -37,15 +37,6 @@
       color: #111827;
     }
 
-    /* Logo Container with rounded border */
-    .logo-container {
-      border: 3px solid #FF6A1A;
-      border-radius: 28px;
-      padding: 16px 32px;
-      box-shadow: 0 0 30px rgba(255, 106, 26, 0.3);
-      background: rgba(255, 106, 26, 0.05);
-    }
-
     /* Lifebuoy pulse */
     .lifebuoy {
       animation: beaconPulse 4s ease-in-out infinite;
@@ -63,7 +54,7 @@
 
     <!-- Logo with rounded rectangular border -->
     <div class="flex justify-center mb-10">
-      <div class="logo-container flex flex-col items-center">
+      <div class="logo-container flex flex-col items-center" style="border: 3px solid #FF6A1A; border-radius: 28px; padding: 16px 32px; box-shadow: 0 0 30px rgba(255, 106, 26, 0.3); background: rgba(255, 106, 26, 0.05);">
         <!-- SOS -->
         <div class="flex items-center text-[4.5rem] font-black tracking-[-7px]">
           <span class="text-[#FF6A1A]">S</span>
@@ -143,7 +134,11 @@
       </div>
 
       <!-- Economy £5 -->
-      <div class="bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border border-orange-500/30 hover:border-orange-500/50 transition-colors">
+      <div class="relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border-2 border-orange-500/50">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-black text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
+          BUDGET OPTION
+        </div>
+
         <div class="text-center mb-8">
           <div class="text-[#FF6A1A] font-semibold tracking-widest text-sm mb-1">ECONOMY</div>
           <div class="text-6xl font-bold text-white mb-1">£5</div>
@@ -186,7 +181,11 @@
       </div>
 
       <!-- Deluxe £20 -->
-      <div class="bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border border-orange-500/30 hover:border-orange-500/50 transition-colors">
+      <div class="relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8 border-2 border-orange-500/50">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-black text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
+          PREMIUM SERVICE
+        </div>
+
         <div class="text-center mb-8">
           <div class="text-[#FF6A1A] font-semibold tracking-widest text-sm mb-1">DELUXE</div>
           <div class="text-6xl font-bold text-white mb-1">£20</div>
