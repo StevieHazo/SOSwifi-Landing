@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@upstash/redis": "^1.30.0"
+    "@upstash/redis": "^1.30.0",
+    "stripe": "^16.0.0"
   }
 }
