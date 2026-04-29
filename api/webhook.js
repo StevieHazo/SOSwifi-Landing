@@ -7,7 +7,7 @@ export const config = {
   },
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
 export default async function handler(req, res) {
   const sig = req.headers["stripe-signature"];
@@ -30,9 +30,9 @@ export default async function handler(req, res) {
     const mac = session.metadata?.mac;
 
     if (mac) {
-      await redis.set(`mac:${mac}`, "paid", { ex: 3600 }); // 1 hour
+      await redis.set(`mac:${mac}`, "paid", { ex: 3600 });
     }
   }
 
-  res.status(200).json({ received: true });
+  return res.status(200).json({ received: true });
 }
