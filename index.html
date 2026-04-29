@@ -144,7 +144,7 @@
           </div>
         </div>
 
-        <button onclick="startCheckout(10)"
+        <button onclick="startCheckout('price_1TM8LkF9howUJR6PDVPAl0qe')"
            class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
           <i class="fa-solid fa-lock mr-2"></i>Pay £10 now • Secure
       </button>
@@ -190,7 +190,7 @@
           </div>
         </div>
 
-        <button onclick="startCheckout(5)"
+        <button onclick="startCheckout('price_1TM8LkF9howUJR6PV4Ezswak')"
            class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
           <i class="fa-solid fa-lock mr-2"></i>Pay £5 now • Secure
         </button>
@@ -235,7 +235,7 @@
           </div>
         </div>
 
-        <button onclick="startCheckout(20)"
+        <button onclick="startCheckout('price_1TM8LkF9howUJR6PlQUXWWkr')"
            class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
           <i class="fa-solid fa-lock mr-2"></i>Pay £20 now • Secure
         </button>
@@ -248,15 +248,15 @@
     </p>
 
   </div>
-  <script>
-async function startCheckout(amount) {
+<script>
+async function startCheckout(priceId) {
   const mac = "AA:BB:CC:DD:EE:FF";
   const ip = "192.168.9.10";
 
   const res = await fetch("/api/create-checkout-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mac, ip, amount })
+    body: JSON.stringify({ mac, ip, priceId })
   });
 
   const data = await res.json();
