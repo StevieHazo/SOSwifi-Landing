@@ -1,9 +1,9 @@
 import { redis } from "../lib/redis.js";
 
 export default async function handler(req, res) {
-  await redis.set("test_key", "working", { ex: 60 });
+  const mac = "AA:BB:CC:DD:EE:FF";
 
-  const value = await redis.get("test_key");
+  await redis.set(`mac:${mac}`, "paid", { ex: 300 }); // 5 min
 
-  return res.status(200).json({ value });
+  return res.status(200).json({ status: "stored" });
 }
