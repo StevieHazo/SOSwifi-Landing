@@ -262,7 +262,11 @@ async function startCheckout(priceId) {
   const data = await res.json();
 
   if (data.url) {
-    window.location.href = data.url;
+    const a = document.createElement("a");
+  a.href = data.url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.click();
   }
 }
 </script>
