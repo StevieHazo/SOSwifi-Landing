@@ -144,12 +144,13 @@
           </div>
         </div>
 
-        <a href="https://buy.stripe.com/eVq14n3Bb6uA35o61l1gs00" target="_blank"
+        <button onclick="startCheckout(10)"
            class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
           <i class="fa-solid fa-lock mr-2"></i>Pay £10 now • Secure
-        </a>
+      </button>
       </div>
 
+        
       <!-- Economy £5 -->
       <div class="pricing-card relative bg-zinc-900/95 backdrop-blur-xl rounded-3xl p-8">
         <div class="badge absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold px-8 py-1.5 rounded-3xl shadow">
@@ -189,10 +190,10 @@
           </div>
         </div>
 
-        <a href="https://buy.stripe.com/fZu6oHefPg5acFYcpJ1gs01" target="_blank"
+        <button onclick="startCheckout(5)"
            class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
           <i class="fa-solid fa-lock mr-2"></i>Pay £5 now • Secure
-        </a>
+        </button>
       </div>
 
       <!-- Deluxe £20 -->
@@ -234,10 +235,10 @@
           </div>
         </div>
 
-        <a href="https://buy.stripe.com/fZudR97Rr7yEeO6cpJ1gs02" target="_blank"
+        <button onclick="startCheckout(20)"
            class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
           <i class="fa-solid fa-lock mr-2"></i>Pay £20 now • Secure
-        </a>
+        </button>
       </div>
 
     </div>
@@ -247,5 +248,23 @@
     </p>
 
   </div>
+  <script>
+async function startCheckout(amount) {
+  const mac = "AA:BB:CC:DD:EE:FF";
+  const ip = "192.168.9.10";
+
+  const res = await fetch("/api/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mac, ip, amount })
+  });
+
+  const data = await res.json();
+
+  if (data.url) {
+    window.location.href = data.url;
+  }
+}
+</script>
 </body>
 </html>
