@@ -4,22 +4,22 @@ const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
 export default async function handler(req, res) {
   try {
-    let priceId;
-
-    // GET support (payment.html)
-    if (req.method === "GET") {
-      priceId = req.query.priceId;
+    if (req.method !== "GET" && req.method !== "POST") {
+      res.setHeader("Allow", "GET, POST");
+      return res.status(405).send("Method Not Allowed");
     }
 
-    // POST support (index.html JS flow)
-    if (req.method === "POST") {
-      const body = req.body;
-      priceId = body.priceId;
-    }
+    const input = req.method === "GET" ? req.query : req.body || {};
+
+    const priceId = input.priceId;
+    const mac = input.mac || "";
+    const ip = input.ip || "";
 
     if (!priceId) {
       return res.status(400).send("Missing priceId");
     }
+
+    const baseUrl = process.env.BASE_URL;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -29,18 +29,20 @@ export default async function handler(req, res) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.BASE_URL}/success`,
-      cancel_url: `${process.env.BASE_URL}/cancel`,
+      metadata: {
+        mac,
+        ip,
+        priceId,
+      },
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/cancel`,
     });
 
-    // IMPORTANT: redirect for GET flow
     if (req.method === "GET") {
-      return res.redirect(session.url);
+      return res.redirect(303, session.url);
     }
 
-    // JSON response for POST flow
     return res.status(200).json({ url: session.url });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
