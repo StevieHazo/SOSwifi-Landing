@@ -4,10 +4,21 @@ const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
 export default async function handler(req, res) {
   try {
-    const { mac, ip, priceId } = req.body;
+    let priceId;
+
+    // GET support (payment.html)
+    if (req.method === "GET") {
+      priceId = req.query.priceId;
+    }
+
+    // POST support (index.html JS flow)
+    if (req.method === "POST") {
+      const body = req.body;
+      priceId = body.priceId;
+    }
 
     if (!priceId) {
-      return res.status(400).json({ error: "Missing priceId" });
+      return res.status(400).send("Missing priceId");
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -20,13 +31,16 @@ export default async function handler(req, res) {
       ],
       success_url: `${process.env.BASE_URL}/success`,
       cancel_url: `${process.env.BASE_URL}/cancel`,
-      metadata: {
-        mac,
-        ip,
-      },
     });
 
+    // IMPORTANT: redirect for GET flow
+    if (req.method === "GET") {
+      return res.redirect(session.url);
+    }
+
+    // JSON response for POST flow
     return res.status(200).json({ url: session.url });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
