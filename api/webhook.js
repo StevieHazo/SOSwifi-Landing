@@ -28,11 +28,12 @@ export default async function handler(req, res) {
     const session = event.data.object;
 
     const mac = session.metadata?.mac;
+    const ip = session.metadata?.ip;
 
     if (mac) {
       await redis.set(`mac:${mac}`, "paid", { ex: 3600 });
     }
   }
 
-  return res.status(200).json({ received: true });
+  res.status(200).json({ received: true });
 }
