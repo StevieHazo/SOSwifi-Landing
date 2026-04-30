@@ -1,125 +1,76 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Continue Payment</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center px-4">
-  <div class="max-w-md w-full px-6 py-10 bg-zinc-800/80 rounded-3xl text-center shadow-xl border border-orange-500/30">
-    <h1 class="text-2xl font-bold mb-4 text-orange-400">Continue to Payment</h1>
-    <p class="text-zinc-400 mb-8 text-sm">Tap below to open the secure Stripe payment page.</p>
+import Stripe from "stripe";
+import { redis } from "../lib/redis.js";
 
-    <button
-      id="payBtn"
-      type="button"
-      class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]"
-    >
-      Continue to Pay • Secure
-    </button>
+const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
-    <a
-      id="fallbackLink"
-      href="#"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="hidden mt-4 block text-sm text-orange-300 underline underline-offset-4"
-    >
-      Open payment page manually
-    </a>
+function safe(v) {
+  return String(v || "").trim();
+}
 
-    <p id="msg" class="text-xs text-zinc-500 mt-6">Secure checkout powered by Stripe</p>
-  </div>
+export default async function handler(req, res) {
+  try {
+    if (req.method !== "GET" && req.method !== "POST") {
+      res.setHeader("Allow", "GET, POST");
+      return res.status(405).send("Method Not Allowed");
+    }
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const session = (params.get("session") || "").trim();
-    const plan = (params.get("plan") || "").trim();
+    const input = req.method === "GET" ? req.query : (req.body || {});
+    const priceId = safe(input.priceId);
+    const sessionId = safe(input.session);
+    const baseUrl = safe(process.env.BASE_URL || process.env.BASEURL);
 
-    const priceMap = {
-      basic: "price_1TM8LkF9howUJR6PV4Ezswak",
-      standard: "price_1TM8LkF9howUJR6PDVPAl0qe",
-      deluxe: "price_1TM8LkF9howUJR6PlQUXWWkr"
+    if (!baseUrl.startsWith("http")) {
+      return res.status(500).json({
+        error: "BASE_URL must include https:// (e.g. https://soswifi.uk)"
+      });
+    }
+
+    if (!priceId) return res.status(400).json({ error: "Missing priceId" });
+    if (!sessionId) return res.status(400).json({ error: "Missing session" });
+
+    const client = await redis.get(`client:${sessionId}`);
+    if (!client) {
+      return res.status(400).json({ error: "Invalid or expired session" });
+    }
+
+    const ip = safe(client.ip || client.clientip);
+    const mac = safe(client.mac || client.clientmac);
+
+    if (!ip) {
+      return res.status(400).json({ error: "Session missing client IP" });
+    }
+
+    const metadata = {
+      sessionId,
+      priceId,
+      ip,
+      ...(mac ? { mac } : {})
     };
 
-    const priceId = priceMap[plan];
-    const payBtn = document.getElementById("payBtn");
-    const fallbackLink = document.getElementById("fallbackLink");
-    const msg = document.getElementById("msg");
+    const checkoutSession = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1
+        }
+      ],
+      client_reference_id: sessionId,
+      metadata,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/cancel`
+    });
 
-    function disableButton(message) {
-      payBtn.disabled = true;
-      payBtn.classList.add("opacity-60", "cursor-not-allowed");
-      msg.textContent = message;
+    if (!checkoutSession.url) {
+      return res.status(500).json({
+        error: "Stripe did not return checkout URL"
+      });
     }
 
-    async function openCheckout() {
-      if (!plan || !priceId) {
-        disableButton("Invalid plan.");
-        return;
-      }
-
-      if (!session) {
-        disableButton("Missing session in URL.");
-        return;
-      }
-
-      payBtn.disabled = true;
-      payBtn.textContent = "Opening secure payment page...";
-      msg.textContent = "Please wait while we prepare Stripe Checkout.";
-
-      try {
-        const url = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
-
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "Accept": "application/json"
-          }
-        });
-
-        const contentType = response.headers.get("content-type") || "";
-        let data = null;
-
-        if (contentType.includes("application/json")) {
-          data = await response.json();
-        } else {
-          const text = await response.text();
-          throw new Error(text || "Unexpected response from server");
-        }
-
-        if (!response.ok || !data?.url) {
-          throw new Error(data?.error || "Could not create payment session");
-        }
-
-        fallbackLink.href = data.url;
-        fallbackLink.classList.remove("hidden");
-        msg.textContent = "If nothing opens automatically, use the manual payment link below.";
-
-        const popup = window.open(data.url, "_blank", "noopener,noreferrer");
-
-        if (!popup) {
-          window.location.href = data.url;
-          return;
-        }
-
-        payBtn.disabled = false;
-        payBtn.textContent = "Open Payment Page Again";
-      } catch (error) {
-        payBtn.disabled = false;
-        payBtn.textContent = "Continue to Pay • Secure";
-        msg.textContent = error?.message || "Unable to open payment page.";
-      }
-    }
-
-    if (!plan || !priceId) {
-      disableButton("Invalid plan.");
-    } else if (!session) {
-      disableButton("Missing session in URL.");
-    } else {
-      payBtn.addEventListener("click", openCheckout);
-    }
-  </script>
-</body>
-</html>
+    return res.status(200).json({ url: checkoutSession.url });
+  } catch (err) {
+    return res.status(500).json({
+      error: err?.message || "Internal Server Error"
+    });
+  }
+}
