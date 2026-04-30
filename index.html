@@ -1,3 +1,7 @@
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const session = params.get("session");
+</script>
 <!doctype html>
 <html lang="en">
 <head>
@@ -144,7 +148,7 @@
           </div>
         </div>
       
-       <a href="/pay.html?plan=standard&mac=$clientmac&ip=$clientip"
+       <a href="/pay.html?plan=standard&session=${session}"
        class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
         <i class="fa-solid fa-lock mr-2"></i>Pay £10 now • Secure
       </a>
@@ -189,7 +193,7 @@
           </div>
         </div>
 
-        <a href="/pay.html?plan=basic&mac=$clientmac&ip=$clientip"
+        <a href="/pay.html?plan=basic&session=${session}"
          class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
          <i class="fa-solid fa-lock mr-2"></i>Pay £5 now • Secure
         </a>
@@ -234,7 +238,7 @@
           </div>
         </div>
 
-      <a href="/pay.html?plan=deluxe&mac=$clientmac&ip=$clientip"
+      <a href="/pay.html?plan=deluxe&session=${session}"
        class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
         <i class="fa-solid fa-lock mr-2"></i>Pay £20 now • Secure
       </a>
