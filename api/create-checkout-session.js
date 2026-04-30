@@ -3,6 +3,12 @@ import { redis } from "../lib/redis.js";
 
 const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
+const PRICE_MAP = {
+  basic: "price_1TM8LkF9howUJR6PV4Ezswak",
+  standard: "price_1TM8LkF9howUJR6PDVPAl0qe",
+  deluxe: "price_1TM8LkF9howUJR6PlQUXWWkr"
+};
+
 export default async function handler(req, res) {
   try {
     if (req.method !== "GET" && req.method !== "POST") {
@@ -11,44 +17,28 @@ export default async function handler(req, res) {
     }
 
     const input = req.method === "GET" ? req.query : (req.body || {});
-    const priceId = String(input.priceId || "").trim();
     const sessionId = String(input.session || "").trim();
+    const plan = String(input.plan || "").trim();
+    const priceId = String(input.priceId || PRICE_MAP[plan] || "").trim();
     const baseUrl = String(process.env.BASE_URL || "").trim();
 
-    if (!priceId) {
-      return res.status(400).json({ error: "Missing priceId" });
-    }
-
-    if (!sessionId) {
-      return res.status(400).json({ error: "Missing session" });
-    }
-
-    if (!baseUrl) {
-      return res.status(500).json({ error: "Missing BASE_URL" });
-    }
+    if (!sessionId) return res.status(400).json({ error: "Missing session" });
+    if (!priceId) return res.status(400).json({ error: "Missing priceId" });
+    if (!baseUrl) return res.status(500).json({ error: "Missing BASE_URL" });
 
     const client = await redis.get(`client:${sessionId}`);
-
     if (!client || !client.mac) {
       return res.status(400).json({ error: "Invalid or expired session" });
     }
 
-    const mac = String(client.mac || "").trim();
-    const ip = String(client.ip || "").trim();
-
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1
-        }
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: sessionId,
       metadata: {
         sessionId,
-        mac,
-        ip,
+        mac: String(client.mac || "").trim(),
+        ip: String(client.ip || "").trim(),
         priceId
       },
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -61,8 +51,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ url: checkoutSession.url });
   } catch (err) {
-    return res.status(500).json({
-      error: err?.message || "Internal Server Error"
-    });
+    return res.status(500).json({ error: err?.message || "Internal Server Error" });
   }
 }
