@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { redis } from "../lib/redis.js";
-
+console.log(JSON.stringify(req.query));
 const FASKEY = process.env.FAS_KEY || "9f3b7c2e8a1d4f6b0c9e5a7d2b8c1f3e";
 
 function safe(v) {
