@@ -48,57 +48,49 @@
     const fallbackLink = document.getElementById("fallbackLink");
     const msg = document.getElementById("msg");
 
-    function disableButton(message) {
+    function setError(text) {
       payBtn.disabled = true;
       payBtn.classList.add("opacity-60", "cursor-not-allowed");
-      msg.textContent = message;
+      msg.textContent = text;
     }
 
     async function openCheckout() {
       if (!plan || !priceId) {
-        disableButton("Invalid plan.");
+        setError("Invalid plan.");
         return;
       }
 
       if (!session) {
-        disableButton("Missing session in URL.");
+        setError("Missing session in URL.");
         return;
       }
 
       payBtn.disabled = true;
-      payBtn.textContent = "Opening secure payment page...";
-      msg.textContent = "Please wait while we prepare Stripe Checkout.";
+      payBtn.textContent = "Preparing secure payment page...";
+      msg.textContent = "Please wait.";
 
       try {
-        const url = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
-
-        const response = await fetch(url, {
+        const apiUrl = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+        const response = await fetch(apiUrl, {
           method: "GET",
-          headers: {
-            "Accept": "application/json"
-          }
+          headers: { "Accept": "application/json" }
         });
 
-        const contentType = response.headers.get("content-type") || "";
-        let data = null;
+        const data = await response.json().catch(() => ({}));
 
-        if (contentType.includes("application/json")) {
-          data = await response.json();
-        } else {
-          const text = await response.text();
-          throw new Error(text || "Unexpected response from server");
+        if (!response.ok) {
+          throw new Error(data.error || "Could not create checkout session");
         }
 
-        if (!response.ok || !data?.url) {
-          throw new Error(data?.error || "Could not create payment session");
+        if (!data.url) {
+          throw new Error("Stripe did not return a checkout URL");
         }
 
         fallbackLink.href = data.url;
         fallbackLink.classList.remove("hidden");
-        msg.textContent = "If nothing opens automatically, use the manual payment link below.";
+        msg.textContent = "If the page doesn't open automatically, use the manual link below.";
 
         const popup = window.open(data.url, "_blank", "noopener,noreferrer");
-
         if (!popup) {
           window.location.href = data.url;
           return;
@@ -106,17 +98,18 @@
 
         payBtn.disabled = false;
         payBtn.textContent = "Open Payment Page Again";
-      } catch (error) {
+      } catch (err) {
         payBtn.disabled = false;
         payBtn.textContent = "Continue to Pay • Secure";
-        msg.textContent = error?.message || "Unable to open payment page.";
+        msg.textContent = err?.message || "Unable to open payment page.";
+        fallbackLink.classList.add("hidden");
       }
     }
 
     if (!plan || !priceId) {
-      disableButton("Invalid plan.");
+      setError("Invalid plan.");
     } else if (!session) {
-      disableButton("Missing session in URL.");
+      setError("Missing session in URL.");
     } else {
       payBtn.addEventListener("click", openCheckout);
     }
