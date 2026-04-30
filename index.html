@@ -1,7 +1,4 @@
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const session = params.get("session");
-</script>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -148,10 +145,7 @@
           </div>
         </div>
       
-       <a href="/pay.html?plan=standard&session=${session}"
-       class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
-        <i class="fa-solid fa-lock mr-2"></i>Pay £10 now • Secure
-      </a>
+       <a id="planStandard" href="#" class="block ...">Pay £10 now • Secure</a>
       </div>
         
       <!-- Economy £5 -->
@@ -193,10 +187,7 @@
           </div>
         </div>
 
-        <a href="/pay.html?plan=basic&session=${session}"
-         class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
-         <i class="fa-solid fa-lock mr-2"></i>Pay £5 now • Secure
-        </a>
+       <a id="planBasic" href="#" class="block ...">Pay £5 now • Secure</a>
       </div>
 
       <!-- Deluxe £20 -->
@@ -238,10 +229,7 @@
           </div>
         </div>
 
-      <a href="/pay.html?plan=deluxe&session=${session}"
-       class="mt-10 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
-        <i class="fa-solid fa-lock mr-2"></i>Pay £20 now • Secure
-      </a>
+     <a id="planDeluxe" href="#" class="block ...">Pay £20 now • Secure</a>
       </div>
 
     </div>
@@ -251,5 +239,27 @@
     </p>
 
   </div>
+  <script>
+  const params = new URLSearchParams(window.location.search);
+  const session = params.get("session");
+
+  const links = {
+    planBasic: "basic",
+    planStandard: "standard",
+    planDeluxe: "deluxe"
+  };
+
+  Object.entries(links).forEach(([id, plan]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (session) {
+      el.href = `/pay.html?plan=${encodeURIComponent(plan)}&session=${encodeURIComponent(session)}`;
+    } else {
+      el.removeAttribute("href");
+      el.classList.add("opacity-60", "cursor-not-allowed");
+    }
+  });
+</script>
 </body>
 </html>
