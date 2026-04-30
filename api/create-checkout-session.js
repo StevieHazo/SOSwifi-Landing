@@ -9,17 +9,29 @@ export default async function handler(req, res) {
       return res.status(405).send("Method Not Allowed");
     }
 
-    const input = req.method === "GET" ? req.query : req.body || {};
+    const input = req.method === "GET" ? req.query : (req.body || {});
 
-    const priceId = input.priceId;
-    const mac = input.mac || "";
-    const ip = input.ip || "";
+    const priceId = String(input.priceId || "").trim();
+    const mac = String(input.mac || "").trim();
+    const ip = String(input.ip || "").trim();
 
     if (!priceId) {
-      return res.status(400).send("Missing priceId");
+      return res.status(400).json({ error: "Missing priceId" });
     }
 
-    const baseUrl = process.env.BASE_URL;
+    if (!mac) {
+      return res.status(400).json({ error: "Missing mac" });
+    }
+
+    if (!ip) {
+      return res.status(400).json({ error: "Missing ip" });
+    }
+
+    const baseUrl = String(process.env.BASE_URL || "").trim();
+
+    if (!baseUrl) {
+      return res.status(500).json({ error: "Missing BASE_URL" });
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -44,6 +56,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ url: session.url });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({
+      error: err?.message || "Internal Server Error",
+    });
   }
 }
