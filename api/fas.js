@@ -11,7 +11,6 @@ function parseFasPayload(fas) {
   try {
     const decoded = Buffer.from(String(fas || ""), "base64").toString("utf8");
     const obj = {};
-
     decoded.split(", ").forEach((pair) => {
       const i = pair.indexOf("=");
       if (i > -1) {
@@ -20,7 +19,6 @@ function parseFasPayload(fas) {
         obj[key] = value;
       }
     });
-
     return obj;
   } catch {
     return {};
@@ -28,11 +26,7 @@ function parseFasPayload(fas) {
 }
 
 function makeSessionId(input) {
-  return crypto
-    .createHash("sha256")
-    .update(input)
-    .digest("hex")
-    .slice(0, 32);
+  return crypto.createHash("sha256").update(input).digest("hex").slice(0, 32);
 }
 
 function sha256(input) {
@@ -40,7 +34,6 @@ function sha256(input) {
 }
 
 export default async function handler(req, res) {
-  console.error("FAS query:", JSON.stringify(req.query));
   try {
     if (req.method === "POST") {
       return res.status(200).send("*");
@@ -71,14 +64,7 @@ export default async function handler(req, res) {
     const sessionId =
       hid ||
       makeSessionId(
-        [
-          clientip,
-          clientmac,
-          gatewayname,
-          gatewayaddress,
-          originurl,
-          Date.now()
-        ].join("|")
+        [clientip, clientmac, gatewayname, gatewayaddress, originurl, Date.now()].join("|")
       );
 
     const rhid = hid ? sha256(hid + FASKEY) : "";
@@ -89,37 +75,26 @@ export default async function handler(req, res) {
         sessionId,
         hid,
         rhid,
+        tok,
         clientip,
-        clientmac,
         ip: clientip,
+        clientmac,
         mac: clientmac,
         gatewayname,
         gatewayaddress,
         originurl,
         clientif,
         authdir,
-        tok,
         paid: false,
         createdAt: Date.now()
       },
       { ex: 3600 }
     );
 
-    const wantsRedirect = !rawFas && (clientip || gatewayname || sessionId);
-    if (wantsRedirect) {
-      return res.redirect(
-        302,
-        `/pay.html?plan=standard&session=${encodeURIComponent(sessionId)}`
-      );
-    }
-
-    if (hid && tok) {
-      return res.status(200).send(rhid);
-    }
-
-    return res
-      .status(200)
-      .send(`/pay.html?plan=standard&session=${encodeURIComponent(sessionId)}`);
+    return res.redirect(
+      302,
+      `/pay.html?plan=standard&session=${encodeURIComponent(sessionId)}`
+    );
   } catch (err) {
     return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
