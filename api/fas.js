@@ -18,27 +18,48 @@ function parseFasPayload(str) {
   return out;
 }
 
-function decodeBase64UrlSafe(input) {
-  const normalized = String(input || "")
-    .trim()
-    .replace(/ /g, "+")
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+function decodeFasBuffer(input) {
+  const raw = String(input || "").trim();
 
-  const pad = normalized.length % 4;
-  const padded = pad ? normalized + "=".repeat(4 - pad) : normalized;
+  const tryBase64 = (() => {
+    const s = raw.replace(/ /g, "+").replace(/-/g, "+").replace(/_/g, "/");
+    const padded = s + "=".repeat((4 - (s.length % 4)) % 4);
+    return Buffer.from(padded, "base64");
+  })();
 
-  return Buffer.from(padded, "base64");
+  if (tryBase64.length > 0 && raw.length % 4 === 0) {
+    return tryBase64;
+  }
+
+  if (/^[0-9a-fA-F]+$/.test(raw) && raw.length % 2 === 0) {
+    return Buffer.from(raw, "hex");
+  }
+
+  return Buffer.from(raw, "utf8");
+}
+
+function decodeIv(rawIv) {
+  const raw = String(rawIv || "").trim();
+
+  if (/^[0-9a-fA-F]+$/.test(raw) && raw.length === 32) {
+    return Buffer.from(raw, "hex");
+  }
+
+  const b64 = decodeFasBuffer(raw);
+  if (b64.length === 16) return b64;
+
+  const hex = Buffer.from(raw, "hex");
+  if (hex.length === 16) return hex;
+
+  const utf8 = Buffer.from(raw, "utf8");
+  if (utf8.length === 16) return utf8;
+
+  throw new Error(`Invalid IV length: ${b64.length}/${hex.length}/${utf8.length} raw=${raw}`);
 }
 
 function decodeFasLevel3(fas, iv, secret) {
-  const ivBuf = decodeBase64UrlSafe(iv);
-
-  if (ivBuf.length !== 16) {
-    throw new Error(`Invalid IV length: ${ivBuf.length}`);
-  }
-
-  const fasBuf = decodeBase64UrlSafe(fas);
+  const ivBuf = decodeIv(iv);
+  const fasBuf = decodeFasBuffer(fas);
 
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
@@ -63,17 +84,9 @@ export default async function handler(req, res) {
     const secret = String(process.env.FAS_KEY || "").trim();
     const baseUrl = String(process.env.BASE_URL || "").trim();
 
-    if (!fas || !iv) {
-      return res.status(400).send("Missing fas or iv");
-    }
-
-    if (!secret) {
-      return res.status(500).send("Missing FAS_KEY");
-    }
-
-    if (!baseUrl) {
-      return res.status(500).send("Missing BASE_URL");
-    }
+    if (!fas || !iv) return res.status(400).send("Missing fas or iv");
+    if (!secret) return res.status(500).send("Missing FAS_KEY");
+    if (!baseUrl) return res.status(500).send("Missing BASE_URL");
 
     const data = decodeFasLevel3(fas, iv, secret);
 
