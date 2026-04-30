@@ -145,11 +145,10 @@
           </div>
         </div>
       
-      <a href="/pay.html?plan=standard"
-        class="mt-10 flex items-center justify-center gap-2 w-full py-4 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.98]">
-          <i class="fa-solid fa-lock"></i>
-          <span>Pay £10 now • Secure</span>
-        </a>
+      <a href="/pay.html?plan=standard" class="pay-link mt-10 flex items-center justify-center gap-2 w-full py-4 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.98]">
+  <i class="fa-solid fa-lock"></i>
+  <span>Pay £10 now • Secure</span>
+</a>
       </div>
         
       <!-- Economy £5 -->
@@ -191,11 +190,10 @@
           </div>
         </div>
 
-     <a href="/pay.html?plan=basic"
-       class="mt-10 flex items-center justify-center gap-2 w-full py-4 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.98]">
-          <i class="fa-solid fa-lock"></i>
-          <span>Pay £5 now • Secure</span>
-     </a>
+     <a href="/pay.html?plan=basic" class="pay-link mt-10 flex items-center justify-center gap-2 w-full py-4 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.98]">
+  <i class="fa-solid fa-lock"></i>
+  <span>Pay £5 now • Secure</span>
+</a>
       </div>
 
       <!-- Deluxe £20 -->
@@ -237,11 +235,10 @@
           </div>
         </div>
 
-    <a href="/pay.html?plan=deluxe"
-      class="mt-10 flex items-center justify-center gap-2 w-full py-4 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.98]">
-          <i class="fa-solid fa-lock"></i>
-          <span>Pay £20 now • Secure</span>
-      </a>
+    <a href="/pay.html?plan=deluxe" class="pay-link mt-10 flex items-center justify-center gap-2 w-full py-4 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.98]">
+  <i class="fa-solid fa-lock"></i>
+  <span>Pay £20 now • Secure</span>
+</a>
 
       </div>
 
@@ -254,10 +251,11 @@
   </div>
   <script>
   const session = new URLSearchParams(location.search).get("session");
+
   document.querySelectorAll(".pay-link").forEach(a => {
-    const url = new URL(a.href, location.origin);
+    const url = new URL(a.getAttribute("href"), location.origin);
     if (session) url.searchParams.set("session", session);
-    a.href = url.pathname + url.search;
+    a.setAttribute("href", url.pathname + url.search);
   });
 </script>
 </body>
