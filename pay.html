@@ -7,32 +7,21 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center">
-
+<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center px-4">
   <div class="max-w-md w-full px-6 py-10 bg-zinc-800/80 rounded-3xl text-center shadow-xl border border-orange-500/30">
-
-    <h1 class="text-2xl font-bold mb-4 text-orange-400">
-      Continue to Payment
-    </h1>
-
-    <p class="text-zinc-400 mb-8 text-sm">
-      Tap below to open secure payment page
-    </p>
+    <h1 class="text-2xl font-bold mb-4 text-orange-400">Continue to Payment</h1>
+    <p class="text-zinc-400 mb-8 text-sm">Tap below to open secure payment page</p>
 
     <a id="payLink"
-       class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all">
+       class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]">
        Continue to Pay • Secure
     </a>
 
-    <p class="text-xs text-zinc-500 mt-6">
-      Secure checkout powered by Stripe
-    </p>
-
+    <p class="text-xs text-zinc-500 mt-6">Secure checkout powered by Stripe</p>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-
     const plan = params.get("plan");
     const mac = params.get("mac");
     const ip = params.get("ip");
@@ -44,14 +33,16 @@
     };
 
     const priceId = priceMap[plan];
+    const payLink = document.getElementById("payLink");
 
-    if (!priceId || !mac) {
-      document.getElementById("payLink").innerText = "Invalid session. Please reconnect.";
+    if (!priceId || !mac || !ip) {
+      payLink.textContent = "Invalid session. Please reconnect.";
+      payLink.removeAttribute("href");
+      payLink.setAttribute("aria-disabled", "true");
+      payLink.classList.add("opacity-60", "cursor-not-allowed");
     } else {
-      document.getElementById("payLink").href =
-        `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&mac=${encodeURIComponent(mac)}&ip=${encodeURIComponent(ip || "")}`;
+      payLink.href = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&mac=${encodeURIComponent(mac)}&ip=${encodeURIComponent(ip)}`;
     }
   </script>
-
 </body>
 </html>
