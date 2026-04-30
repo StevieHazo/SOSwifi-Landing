@@ -9,14 +9,24 @@
 <body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center px-4">
   <div class="max-w-md w-full px-6 py-10 bg-zinc-800/80 rounded-3xl text-center shadow-xl border border-orange-500/30">
     <h1 class="text-2xl font-bold mb-4 text-orange-400">Continue to Payment</h1>
-    <p class="text-zinc-400 mb-8 text-sm">Tap below to open secure payment page</p>
+    <p class="text-zinc-400 mb-8 text-sm">Tap below to open the secure Stripe payment page.</p>
 
-    <a
-      id="payLink"
-      href="#"
+    <button
+      id="payBtn"
+      type="button"
       class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]"
     >
       Continue to Pay • Secure
+    </button>
+
+    <a
+      id="fallbackLink"
+      href="#"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden mt-4 block text-sm text-orange-300 underline underline-offset-4"
+    >
+      Open payment page manually
     </a>
 
     <p id="msg" class="text-xs text-zinc-500 mt-6">Secure checkout powered by Stripe</p>
@@ -34,21 +44,81 @@
     };
 
     const priceId = priceMap[plan];
-    const payLink = document.getElementById("payLink");
+    const payBtn = document.getElementById("payBtn");
+    const fallbackLink = document.getElementById("fallbackLink");
     const msg = document.getElementById("msg");
 
+    function disableButton(message) {
+      payBtn.disabled = true;
+      payBtn.classList.add("opacity-60", "cursor-not-allowed");
+      msg.textContent = message;
+    }
+
+    async function openCheckout() {
+      if (!plan || !priceId) {
+        disableButton("Invalid plan.");
+        return;
+      }
+
+      if (!session) {
+        disableButton("Missing session in URL.");
+        return;
+      }
+
+      payBtn.disabled = true;
+      payBtn.textContent = "Opening secure payment page...";
+      msg.textContent = "Please wait while we prepare Stripe Checkout.";
+
+      try {
+        const url = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json"
+          }
+        });
+
+        const contentType = response.headers.get("content-type") || "";
+        let data = null;
+
+        if (contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          throw new Error(text || "Unexpected response from server");
+        }
+
+        if (!response.ok || !data?.url) {
+          throw new Error(data?.error || "Could not create payment session");
+        }
+
+        fallbackLink.href = data.url;
+        fallbackLink.classList.remove("hidden");
+        msg.textContent = "If nothing opens automatically, use the manual payment link below.";
+
+        const popup = window.open(data.url, "_blank", "noopener,noreferrer");
+
+        if (!popup) {
+          window.location.href = data.url;
+          return;
+        }
+
+        payBtn.disabled = false;
+        payBtn.textContent = "Open Payment Page Again";
+      } catch (error) {
+        payBtn.disabled = false;
+        payBtn.textContent = "Continue to Pay • Secure";
+        msg.textContent = error?.message || "Unable to open payment page.";
+      }
+    }
+
     if (!plan || !priceId) {
-      payLink.removeAttribute("href");
-      payLink.classList.add("opacity-60", "cursor-not-allowed");
-      payLink.style.pointerEvents = "none";
-      msg.textContent = "Invalid plan.";
+      disableButton("Invalid plan.");
     } else if (!session) {
-      payLink.removeAttribute("href");
-      payLink.classList.add("opacity-60", "cursor-not-allowed");
-      payLink.style.pointerEvents = "none";
-      msg.textContent = "Missing session in URL.";
+      disableButton("Missing session in URL.");
     } else {
-      payLink.href = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+      payBtn.addEventListener("click", openCheckout);
     }
   </script>
 </body>
