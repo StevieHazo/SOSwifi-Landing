@@ -247,27 +247,5 @@
     </p>
 
   </div>
-<script>
-async function startCheckout(priceId) {
-  const mac = "AA:BB:CC:DD:EE:FF";
-  const ip = "192.168.9.10";
-
-  const res = await fetch("/api/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mac, ip, priceId })
-  });
-
-  const data = await res.json();
-
-  if (data.url) {
-    const a = document.createElement("a");
-  a.href = data.url;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.click();
-  }
-}
-</script>
 </body>
 </html>
