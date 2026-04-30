@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { buffer } from "micro";
 import { redis } from "../lib/redis.js";
 
 export const config = {
@@ -15,8 +16,10 @@ export default async function handler(req, res) {
   let event;
 
   try {
+    const buf = await buffer(req); // 🔥 REQUIRED FIX
+
     event = stripe.webhooks.constructEvent(
-      req.body,
+      buf,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -28,7 +31,6 @@ export default async function handler(req, res) {
     const session = event.data.object;
 
     const mac = session.metadata?.mac;
-    const ip = session.metadata?.ip;
 
     if (mac) {
       await redis.set(`mac:${mac}`, "paid", { ex: 3600 });
