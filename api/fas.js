@@ -1,64 +1,83 @@
 import crypto from "crypto";
-import { Redis } from "@upstash/redis";
+import { redis } from "../lib/redis.js";
 
-const redis = new Redis({
-  url: process.env.UPSTASH_KV_URL,
-  token: process.env.UPSTASH_KV_REST_API_TOKEN,
-});
-
-// helper to derive 32-byte key
-function getKey(key) {
-  return crypto.createHash("sha256").update(key).digest();
+function getKey(secret) {
+  return crypto.createHash("sha256").update(secret).digest();
 }
 
-function decodeFas(fas, key) {
-  const raw = Buffer.from(fas, "base64");
+function parseFasPayload(str) {
+  const out = {};
+  for (const part of str.split(", ")) {
+    const i = part.indexOf("=");
+    if (i > -1) {
+      const key = part.slice(0, i).trim();
+      const value = part.slice(i + 1).trim();
+      out[key] = value;
+    }
+  }
+  return out;
+}
 
-  const iv = raw.subarray(0, 16);
-  const encrypted = raw.subarray(16);
-
+function decodeFasLevel3(fas, iv, secret) {
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
-    getKey(key),
-    iv
+    getKey(secret),
+    Buffer.from(iv, "base64")
   );
 
-  let decrypted = decipher.update(encrypted);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  let decrypted = decipher.update(Buffer.from(fas, "base64"));
+  decrypted = Buffer.concat([decrypted, decipher.final()]).toString("utf8");
 
-  return JSON.parse(decrypted.toString());
+  return parseFasPayload(decrypted);
+}
+
+function randomSession() {
+  return crypto.randomBytes(16).toString("hex");
 }
 
 export default async function handler(req, res) {
   try {
-    const { fas } = req.query;
+    const fas = String(req.query.fas || "").trim();
+    const iv = String(req.query.iv || "").trim();
+    const secret = String(process.env.FAS_KEY || "").trim();
+    const baseUrl = String(process.env.BASE_URL || "").trim();
 
-    if (!fas) {
-      return res.redirect("https://soswifi.uk/?error=missing_fas");
+    if (!fas || !iv) {
+      return res.status(400).send("Missing fas or iv");
     }
 
-    const key = process.env.FAS_KEY; // MUST match router
+    if (!secret) {
+      return res.status(500).send("Missing FAS_KEY");
+    }
 
-    const data = decodeFas(fas, key);
+    if (!baseUrl) {
+      return res.status(500).send("Missing BASE_URL");
+    }
 
-    const mac = data.clientmac;
-    const ip = data.clientip;
+    const data = decodeFasLevel3(fas, iv, secret);
+
+    const mac = String(data.clientmac || "").trim();
+    const ip = String(data.clientip || "").trim();
 
     if (!mac) {
-      return res.redirect("https://soswifi.uk/?error=no_mac");
+      return res.status(400).send("Missing clientmac in FAS payload");
     }
 
-    // store in redis
-    await redis.set(`client:${mac}`, {
-      mac,
-      ip,
-      ts: Date.now(),
-      status: "pending",
-    });
+    const session = randomSession();
 
-    return res.redirect(`https://soswifi.uk/?session=${encodeURIComponent(mac)}`);
+    await redis.set(
+      `client:${session}`,
+      {
+        mac,
+        ip,
+        ts: Date.now(),
+        status: "pending"
+      },
+      { ex: 900 }
+    );
 
+    return res.redirect(302, `${baseUrl}/?session=${encodeURIComponent(session)}`);
   } catch (err) {
-    return res.redirect("https://soswifi.uk/?error=fas_decode_failed");
+    return res.status(500).send(`FAS decode failed: ${err?.message || "Unknown error"}`);
   }
 }
