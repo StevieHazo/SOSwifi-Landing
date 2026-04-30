@@ -11,6 +11,11 @@ export const config = {
 const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).send("Method Not Allowed");
+  }
+
   const sig = req.headers["stripe-signature"];
   let event;
 
@@ -27,10 +32,28 @@ export default async function handler(req, res) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const mac = session.metadata?.mac;
+    const mac = String(session.metadata?.mac || "").trim();
+    const ip = String(session.metadata?.ip || "").trim();
+    const sessionId = String(session.metadata?.sessionId || "").trim();
+    const priceId = String(session.metadata?.priceId || "").trim();
 
     if (mac) {
       await redis.set(`mac:${mac}`, "paid", { ex: 3600 });
+    }
+
+    if (sessionId) {
+      await redis.set(
+        `payment:${sessionId}`,
+        JSON.stringify({
+          status: "paid",
+          mac,
+          ip,
+          priceId,
+          stripeSessionId: session.id,
+          paidAt: Date.now()
+        }),
+        { ex: 86400 }
+      );
     }
   }
 
