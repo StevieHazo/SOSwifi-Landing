@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { redis } from "../lib/redis.js";
 
+const FASKEY = process.env.FAS_KEY || "9f3b7c2e8a1d4f6b0c9e5a7d2b8c1f3e";
+
 function safe(v) {
   return String(v || "").trim();
 }
@@ -33,6 +35,10 @@ function makeSessionId(input) {
     .slice(0, 32);
 }
 
+function sha256(input) {
+  return crypto.createHash("sha256").update(String(input)).digest("hex");
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === "POST") {
@@ -58,7 +64,8 @@ export default async function handler(req, res) {
     const originurl = safe(parsed.originurl || req.query.originurl);
     const clientif = safe(parsed.clientif || req.query.clientif);
     const authdir = safe(parsed.authdir || req.query.authdir);
-    const hid = safe(parsed.client_hid || parsed.clienthid || parsed.hid);
+    const hid = safe(parsed.client_hid || parsed.clienthid || parsed.hid || req.query.hid);
+    const tok = safe(parsed.tok || req.query.tok);
 
     const sessionId =
       hid ||
@@ -73,28 +80,45 @@ export default async function handler(req, res) {
         ].join("|")
       );
 
+    const rhid = hid ? sha256(hid + FASKEY) : "";
+
     await redis.set(
       `client:${sessionId}`,
       {
         sessionId,
         hid,
+        rhid,
         clientip,
         clientmac,
+        ip: clientip,
+        mac: clientmac,
         gatewayname,
         gatewayaddress,
         originurl,
         clientif,
         authdir,
+        tok,
         paid: false,
         createdAt: Date.now()
       },
       { ex: 3600 }
     );
 
-    return res.redirect(
-      302,
-      `/index.html?session=${encodeURIComponent(sessionId)}`
-    );
+    const wantsRedirect = !rawFas && (clientip || gatewayname || sessionId);
+    if (wantsRedirect) {
+      return res.redirect(
+        302,
+        `/pay.html?plan=standard&session=${encodeURIComponent(sessionId)}`
+      );
+    }
+
+    if (hid && tok) {
+      return res.status(200).send(rhid);
+    }
+
+    return res
+      .status(200)
+      .send(`/pay.html?plan=standard&session=${encodeURIComponent(sessionId)}`);
   } catch (err) {
     return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
