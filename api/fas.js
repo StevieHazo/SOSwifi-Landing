@@ -18,14 +18,35 @@ function parseFasPayload(str) {
   return out;
 }
 
+function decodeBase64UrlSafe(input) {
+  const normalized = String(input || "")
+    .trim()
+    .replace(/ /g, "+")
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  const pad = normalized.length % 4;
+  const padded = pad ? normalized + "=".repeat(4 - pad) : normalized;
+
+  return Buffer.from(padded, "base64");
+}
+
 function decodeFasLevel3(fas, iv, secret) {
+  const ivBuf = decodeBase64UrlSafe(iv);
+
+  if (ivBuf.length !== 16) {
+    throw new Error(`Invalid IV length: ${ivBuf.length}`);
+  }
+
+  const fasBuf = decodeBase64UrlSafe(fas);
+
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
     getKey(secret),
-    Buffer.from(iv, "base64")
+    ivBuf
   );
 
-  let decrypted = decipher.update(Buffer.from(fas, "base64"));
+  let decrypted = decipher.update(fasBuf);
   decrypted = Buffer.concat([decrypted, decipher.final()]).toString("utf8");
 
   return parseFasPayload(decrypted);
