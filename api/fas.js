@@ -1,26 +1,36 @@
 import crypto from "crypto";
 import { redis } from "../lib/redis.js";
 
-const FASKEY = process.env.FAS_KEY || "9f3b7c2e8a1d4f6b0c9e5a7d2b8c1f3e";
-
-function parseFasPayload(fas) {
-  const decoded = Buffer.from(String(fas || ""), "base64").toString("utf8");
-  const obj = {};
-
-  decoded.split(", ").forEach(pair => {
-    const idx = pair.indexOf("=");
-    if (idx > -1) {
-      const key = pair.slice(0, idx).trim();
-      const value = pair.slice(idx + 1).trim();
-      obj[key] = value;
-    }
-  });
-
-  return obj;
+function safe(v) {
+  return String(v || "").trim();
 }
 
-function sha256(input) {
-  return crypto.createHash("sha256").update(input).digest("hex");
+function parseFasPayload(fas) {
+  try {
+    const decoded = Buffer.from(String(fas || ""), "base64").toString("utf8");
+    const obj = {};
+
+    decoded.split(", ").forEach((pair) => {
+      const i = pair.indexOf("=");
+      if (i > -1) {
+        const key = pair.slice(0, i).trim();
+        const value = pair.slice(i + 1).trim();
+        obj[key] = value;
+      }
+    });
+
+    return obj;
+  } catch {
+    return {};
+  }
+}
+
+function makeSessionId(input) {
+  return crypto
+    .createHash("sha256")
+    .update(input)
+    .digest("hex")
+    .slice(0, 32);
 }
 
 export default async function handler(req, res) {
@@ -34,36 +44,47 @@ export default async function handler(req, res) {
       return res.status(405).send("Method Not Allowed");
     }
 
-    if (req.query.status === "authenticated") {
+    if (safe(req.query.status) === "authenticated") {
       return res.status(200).send("Already authenticated");
     }
 
-    const fas = String(req.query.fas || "").trim();
-    if (!fas) {
-      return res.status(400).send("Missing fas");
-    }
+    const rawFas = safe(req.query.fas);
+    const parsed = rawFas ? parseFasPayload(rawFas) : {};
 
-    const data = parseFasPayload(fas);
+    const clientip = safe(parsed.clientip || req.query.clientip);
+    const clientmac = safe(parsed.clientmac || req.query.clientmac);
+    const gatewayname = safe(parsed.gatewayname || req.query.gatewayname);
+    const gatewayaddress = safe(parsed.gatewayaddress || req.query.gatewayaddress);
+    const originurl = safe(parsed.originurl || req.query.originurl);
+    const clientif = safe(parsed.clientif || req.query.clientif);
+    const authdir = safe(parsed.authdir || req.query.authdir);
+    const hid = safe(parsed.client_hid || parsed.clienthid || parsed.hid);
 
     const sessionId =
-      String(data.client_hid || data.clienthid || data.hid || "").trim();
-
-    if (!sessionId) {
-      return res.status(400).send("Missing hid");
-    }
+      hid ||
+      makeSessionId(
+        [
+          clientip,
+          clientmac,
+          gatewayname,
+          gatewayaddress,
+          originurl,
+          Date.now()
+        ].join("|")
+      );
 
     await redis.set(
       `client:${sessionId}`,
       {
         sessionId,
-        clientip: String(data.clientip || "").trim(),
-        clientmac: String(data.clientmac || "").trim(),
-        gatewayname: String(data.gatewayname || "").trim(),
-        gatewayaddress: String(data.gatewayaddress || "").trim(),
-        authdir: String(data.authdir || "").trim(),
-        originurl: String(data.originurl || "").trim(),
-        clientif: String(data.clientif || "").trim(),
-        hid: sessionId,
+        hid,
+        clientip,
+        clientmac,
+        gatewayname,
+        gatewayaddress,
+        originurl,
+        clientif,
+        authdir,
         paid: false,
         createdAt: Date.now()
       },
