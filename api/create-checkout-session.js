@@ -19,9 +19,14 @@ export default async function handler(req, res) {
     const sessionId = safe(input.session);
     const baseUrl = safe(process.env.BASE_URL || process.env.BASEURL);
 
+    if (!baseUrl.startsWith("http")) {
+      return res.status(500).json({
+        error: "BASE_URL must include https:// (e.g. https://soswifi.uk)"
+      });
+    }
+
     if (!priceId) return res.status(400).json({ error: "Missing priceId" });
     if (!sessionId) return res.status(400).json({ error: "Missing session" });
-    if (!baseUrl) return res.status(500).json({ error: "Missing BASE_URL" });
 
     const client = await redis.get(`client:${sessionId}`);
     if (!client) {
@@ -35,24 +40,37 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Session missing client IP" });
     }
 
-    const metadata = { sessionId, priceId, ip };
-    if (mac) metadata.mac = mac;
+    const metadata = {
+      sessionId,
+      priceId,
+      ip,
+      ...(mac ? { mac } : {})
+    };
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1
+        }
+      ],
       client_reference_id: sessionId,
       metadata,
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/cancel`
     });
 
-    if (req.method === "GET") {
-      return res.redirect(303, checkoutSession.url);
+    if (!checkoutSession.url) {
+      return res.status(500).json({
+        error: "Stripe did not return checkout URL"
+      });
     }
 
     return res.status(200).json({ url: checkoutSession.url });
   } catch (err) {
-    return res.status(500).json({ error: err?.message || "Internal Server Error" });
+    return res.status(500).json({
+      error: err?.message || "Internal Server Error"
+    });
   }
 }
