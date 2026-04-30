@@ -1,51 +1,53 @@
 import Stripe from "stripe";
+import { buffer } from "micro";
 import { redis } from "../lib/redis.js";
 
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};
+
 const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export default async function handler(req, res) {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
   try {
-    if (req.method !== "POST") {
-      res.setHeader("Allow", "POST");
-      return res.status(405).send("Method Not Allowed");
-    }
-
-    if (!webhookSecret) {
-      return res.status(500).send("Missing STRIPE_WEBHOOK_SECRET");
-    }
-
-    const sig = req.headers["stripe-signature"];
-    if (!sig) {
-      return res.status(400).send("Missing Stripe signature");
-    }
-
-    const event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      const sessionId = String(session.metadata?.sessionId || session.client_reference_id || "").trim();
-
-      if (sessionId) {
-        const client = await redis.get(`client:${sessionId}`);
-        if (client) {
-          const data = typeof client === "string" ? JSON.parse(client) : client;
-          await redis.set(
-            `client:${sessionId}`,
-            {
-              ...data,
-              status: "paid",
-              paidAt: Date.now(),
-              stripeSessionId: session.id
-            },
-            { ex: 86400 }
-          );
-        }
-      }
-    }
-
-    return res.status(200).json({ received: true });
+    const buf = await buffer(req);
+    event = stripe.webhooks.constructEvent(
+      buf,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err?.message || "Unknown error"}`);
+    return res.status(400).send("Webhook Error");
   }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    const sessionId = String(session.metadata?.sessionId || "").trim();
+    const mac = String(session.metadata?.mac || "").trim();
+    const ip = String(session.metadata?.ip || "").trim();
+
+    if (sessionId) {
+      await redis.set(`paid:session:${sessionId}`, "paid", { ex: 3600 });
+      await redis.set(`paid:ip:${ip}`, sessionId, { ex: 3600 });
+    }
+
+    if (mac) {
+      await redis.set(`mac:${mac}`, "paid", { ex: 3600 });
+    }
+
+    const client = sessionId ? await redis.get(`client:${sessionId}`) : null;
+    if (client) {
+      client.paid = true;
+      client.paidAt = Date.now();
+      await redis.set(`client:${sessionId}`, client, { ex: 3600 });
+    }
+  }
+
+  return res.status(200).json({ received: true });
 }
