@@ -49,8 +49,6 @@
       msg.textContent = "Missing session in URL.";
     } else {
       payLink.href = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
-      payLink.style.pointerEvents = "auto";
-      msg.textContent = "Secure checkout powered by Stripe";
     }
   </script>
 </body>
