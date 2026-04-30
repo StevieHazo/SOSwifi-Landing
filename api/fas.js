@@ -40,7 +40,7 @@ function sha256(input) {
 }
 
 export default async function handler(req, res) {
-  console.log("FAS query:", JSON.stringify(req.query));
+  console.error("FAS query:", JSON.stringify(req.query));
   try {
     if (req.method === "POST") {
       return res.status(200).send("*");
