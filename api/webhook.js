@@ -4,20 +4,18 @@ import { redis } from "../lib/redis.js";
 
 export const config = {
   api: {
-    bodyParser: false,
-  },
+    bodyParser: false
+  }
 };
 
 const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 
 export default async function handler(req, res) {
   const sig = req.headers["stripe-signature"];
-
   let event;
 
   try {
-    const buf = await buffer(req); // 🔥 REQUIRED FIX
-
+    const buf = await buffer(req);
     event = stripe.webhooks.constructEvent(
       buf,
       sig,
@@ -29,7 +27,6 @@ export default async function handler(req, res) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-
     const mac = session.metadata?.mac;
 
     if (mac) {
@@ -37,5 +34,5 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ received: true });
+  return res.status(200).json({ received: true });
 }
