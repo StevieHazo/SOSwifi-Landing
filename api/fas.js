@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { redis } from "../lib/redis.js";
-console.log(JSON.stringify(req.query));
+
 const FASKEY = process.env.FAS_KEY || "9f3b7c2e8a1d4f6b0c9e5a7d2b8c1f3e";
 
 function safe(v) {
@@ -40,6 +40,7 @@ function sha256(input) {
 }
 
 export default async function handler(req, res) {
+  console.log("FAS query:", JSON.stringify(req.query));
   try {
     if (req.method === "POST") {
       return res.status(200).send("*");
