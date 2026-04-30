@@ -38,14 +38,19 @@ export default async function handler(req, res) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1
+        }
+      ],
+      client_reference_id: sessionId,
       metadata: {
+        sessionId,
         mac,
         ip,
-        priceId,
-        sessionId
+        priceId
       },
-      client_reference_id: mac,
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/cancel`
     });
