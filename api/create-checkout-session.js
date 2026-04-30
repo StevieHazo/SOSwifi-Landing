@@ -35,12 +35,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Session missing client IP" });
     }
 
-    const metadata = {
-      sessionId,
-      priceId,
-      ip
-    };
-
+    const metadata = { sessionId, priceId, ip };
     if (mac) metadata.mac = mac;
 
     const checkoutSession = await stripe.checkout.sessions.create({
@@ -58,8 +53,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ url: checkoutSession.url });
   } catch (err) {
-    return res.status(500).json({
-      error: err?.message || "Internal Server Error"
-    });
+    return res.status(500).json({ error: err?.message || "Internal Server Error" });
   }
 }
