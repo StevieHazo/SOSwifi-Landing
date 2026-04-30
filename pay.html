@@ -1,14 +1,46 @@
-const params = new URLSearchParams(window.location.search);
-const session = params.get("session");
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Continue Payment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-md w-full px-6 py-10 bg-zinc-800/80 rounded-3xl text-center shadow-xl border border-orange-500/30">
+    <h1 class="text-2xl font-bold mb-4 text-orange-400">Continue to Payment</h1>
+    <p class="text-zinc-400 mb-8 text-sm">Tap below to open secure payment page</p>
 
-const priceMap = {
-  basic: "price_1TM8LkF9howUJR6PV4Ezswak",
-  standard: "price_1TM8LkF9howUJR6PDVPAl0qe",
-  deluxe: "price_1TM8LkF9howUJR6PlQUXWWkr"
-};
+    <a id="payLink"
+       class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]">
+      Continue to Pay • Secure
+    </a>
 
-const plan = params.get("plan");
-const priceId = priceMap[plan];
+    <p id="msg" class="text-xs text-zinc-500 mt-6">Secure checkout powered by Stripe</p>
+  </div>
 
-document.getElementById("payLink").href =
-  `/api/create-checkout-session?priceId=${priceId}&session=${session}`;
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const session = params.get("session");
+    const plan = params.get("plan");
+
+    const priceMap = {
+      basic: "price_1TM8LkF9howUJR6PV4Ezswak",
+      standard: "price_1TM8LkF9howUJR6PDVPAl0qe",
+      deluxe: "price_1TM8LkF9howUJR6PlQUXWWkr"
+    };
+
+    const priceId = priceMap[plan];
+    const payLink = document.getElementById("payLink");
+    const msg = document.getElementById("msg");
+
+    if (!session || !priceId) {
+      payLink.removeAttribute("href");
+      payLink.classList.add("opacity-60", "cursor-not-allowed");
+      msg.textContent = "Invalid payment session. Please reconnect.";
+    } else {
+      payLink.href = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+    }
+  </script>
+</body>
+</html>
