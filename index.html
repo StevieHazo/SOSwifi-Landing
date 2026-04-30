@@ -145,7 +145,12 @@
           </div>
         </div>
       
-       <a id="planStandard" href="#" class="block ...">Pay £10 now • Secure</a>
+       <a id="planStandard"
+       href="#"
+       class="mt-4 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/70 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
+      <i class="fa-solid fa-lock mr-2"></i>Pay £10 now • Secure
+      </a>
+        <p id="sessionMsg" class="text-xs text-zinc-500 mt-4"></p>
       </div>
         
       <!-- Economy £5 -->
@@ -187,7 +192,12 @@
           </div>
         </div>
 
-       <a id="planBasic" href="#" class="block ...">Pay £5 now • Secure</a>
+       <a id="planBasic"
+       href="#"
+       class="block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/50 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
+      <i class="fa-solid fa-lock mr-2"></i>Pay £5 now • Secure
+      </a>
+        <p id="sessionMsg" class="text-xs text-zinc-500 mt-4"></p>
       </div>
 
       <!-- Deluxe £20 -->
@@ -229,7 +239,13 @@
           </div>
         </div>
 
-     <a id="planDeluxe" href="#" class="block ...">Pay £20 now • Secure</a>
+     <a id="planDeluxe"
+   href="#"
+   class="mt-4 block w-full py-5 bg-orange-500/10 hover:bg-orange-500/20 border-2 border-orange-500/50 text-white font-semibold rounded-2xl text-center transition-all active:scale-[0.97] text-lg">
+  <i class="fa-solid fa-lock mr-2"></i>Pay £20 now • Secure
+</a>
+
+<p id="sessionMsg" class="text-xs text-zinc-500 mt-4"></p>
       </div>
 
     </div>
@@ -243,13 +259,15 @@
   const params = new URLSearchParams(window.location.search);
   const session = params.get("session");
 
-  const links = {
-    planBasic: "basic",
-    planStandard: "standard",
-    planDeluxe: "deluxe"
-  };
+  const links = [
+    { id: "planBasic", plan: "basic" },
+    { id: "planStandard", plan: "standard" },
+    { id: "planDeluxe", plan: "deluxe" }
+  ];
 
-  Object.entries(links).forEach(([id, plan]) => {
+  const sessionMsg = document.getElementById("sessionMsg");
+
+  links.forEach(({ id, plan }) => {
     const el = document.getElementById(id);
     if (!el) return;
 
@@ -260,6 +278,10 @@
       el.classList.add("opacity-60", "cursor-not-allowed");
     }
   });
+
+  if (!session) {
+    sessionMsg.textContent = "Missing session. Please reconnect to Wi‑Fi.";
+  }
 </script>
 </body>
 </html>
