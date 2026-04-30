@@ -11,8 +11,11 @@
     <h1 class="text-2xl font-bold mb-4 text-orange-400">Continue to Payment</h1>
     <p class="text-zinc-400 mb-8 text-sm">Tap below to open secure payment page</p>
 
-    <a id="payLink"
-       class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]">
+    <a
+      id="payLink"
+      href="#"
+      class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]"
+    >
       Continue to Pay • Secure
     </a>
 
@@ -21,8 +24,8 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const session = params.get("session");
-    const plan = params.get("plan");
+    const session = (params.get("session") || "").trim();
+    const plan = (params.get("plan") || "").trim();
 
     const priceMap = {
       basic: "price_1TM8LkF9howUJR6PV4Ezswak",
@@ -34,12 +37,20 @@
     const payLink = document.getElementById("payLink");
     const msg = document.getElementById("msg");
 
-    if (!session || !priceId) {
+    if (!plan || !priceId) {
       payLink.removeAttribute("href");
       payLink.classList.add("opacity-60", "cursor-not-allowed");
-      msg.textContent = "Invalid payment session. Please reconnect.";
+      payLink.style.pointerEvents = "none";
+      msg.textContent = "Invalid plan.";
+    } else if (!session) {
+      payLink.removeAttribute("href");
+      payLink.classList.add("opacity-60", "cursor-not-allowed");
+      payLink.style.pointerEvents = "none";
+      msg.textContent = "Missing session in URL.";
     } else {
       payLink.href = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+      payLink.style.pointerEvents = "auto";
+      msg.textContent = "Secure checkout powered by Stripe";
     }
   </script>
 </body>
