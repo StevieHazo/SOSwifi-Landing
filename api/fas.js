@@ -1,8 +1,4 @@
-console.log("METHOD", req.method);
-console.log("QUERY", req.query);
-console.log("FAS LEN", String(req.query.fas || "").length);
-console.log("IV RAW", String(req.query.iv || ""));
-console.log("IV LEN", String(req.query.iv || "").length);
+
 import crypto from "crypto";
 import { redis } from "../lib/redis.js";
 
