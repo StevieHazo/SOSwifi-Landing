@@ -8,27 +8,9 @@ function safe(v) {
   return String(v || "").trim();
 }
 
-function sha256(input) {
-  return crypto.createHash("sha256").update(String(input)).digest("hex");
-}
-
-function normalizeBase64(input) {
-  let s = safe(input);
-  if (!s) return "";
-  try {
-    s = decodeURIComponent(s);
-  } catch {}
-  s = s.replace(/ /g, "+").replace(/-/g, "+").replace(/_/g, "/");
-  while (s.length % 4) s += "=";
-  return s;
-}
-
 function parseFasPayload(fas) {
   try {
-    const normalized = normalizeBase64(fas);
-    if (!normalized) return {};
-
-    const decoded = Buffer.from(normalized, "base64").toString("utf8");
+    const decoded = Buffer.from(String(fas || ""), "base64").toString("utf8");
     const obj = {};
 
     decoded.split(", ").forEach((pair) => {
@@ -52,6 +34,10 @@ function makeSessionId(input) {
     .update(String(input))
     .digest("hex")
     .slice(0, 32);
+}
+
+function sha256(input) {
+  return crypto.createHash("sha256").update(String(input)).digest("hex");
 }
 
 export default async function handler(req, res) {
@@ -83,16 +69,13 @@ export default async function handler(req, res) {
       parsed.client_hid ||
       parsed.clienthid ||
       parsed.hid ||
-      req.query.client_hid ||
       req.query.hid
     );
     const tok = safe(parsed.tok || req.query.tok);
 
-    const sessionId =
-      hid ||
-      makeSessionId(
-        [clientip, clientmac, gatewayname, gatewayaddress, originurl].join("|")
-      );
+    const sessionId = makeSessionId(
+      [clientip, gatewayname, gatewayaddress, originurl].join("|")
+    );
 
     const rhid = hid ? sha256(hid + FASKEY) : "";
 
@@ -111,23 +94,7 @@ export default async function handler(req, res) {
       clientif,
       authdir,
       paid: false,
-      createdAt: Date.now(),
-      rawQuery: {
-        clientip: safe(req.query.clientip),
-        clientmac: safe(req.query.clientmac),
-        gatewayname: safe(req.query.gatewayname),
-        gatewayaddress: safe(req.query.gatewayaddress),
-        originurl: safe(req.query.originurl),
-        clientif: safe(req.query.clientif),
-        authdir: safe(req.query.authdir),
-        hid: safe(req.query.hid),
-        status: safe(req.query.status)
-      },
-      fasDebug: {
-        hasFas: !!rawFas,
-        parsedKeys: Object.keys(parsed || {}),
-        rawFasLength: rawFas.length
-      }
+      createdAt: Date.now()
     };
 
     await redis.set(`client:${sessionId}`, clientRecord, { ex: 3600 });
@@ -136,31 +103,20 @@ export default async function handler(req, res) {
       await redis.set(`clientip:${clientip}`, sessionId, { ex: 3600 });
     }
 
-    if (clientmac) {
-      await redis.set(`clientmac:${clientmac}`, sessionId, { ex: 3600 });
-    }
-
     const alreadyPaidSession = await redis.get(`paid:session:${sessionId}`);
     const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
-    const alreadyPaidMAC = clientmac ? await redis.get(`auth:mac:${clientmac}`) : null;
 
-    if (
-      alreadyPaidSession === "paid" ||
-      alreadyPaidIP ||
-      alreadyPaidMAC === "paid"
-    ) {
+    if (alreadyPaidSession === "paid" || alreadyPaidIP) {
       return res.status(200).send("Already authenticated");
     }
 
-    return res.status(200).json({
-  rawQuery: req.query,
-  parsed,
-  clientip,
-  clientmac,
-  hid,
-  tok
-});
+    return res.redirect(
+      302,
+      `/?session=${encodeURIComponent(sessionId)}`
+    );
   } catch (err) {
-    return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
+    return res
+      .status(500)
+      .send(`FAS error: ${err?.message || "Unknown error"}`);
   }
 }
