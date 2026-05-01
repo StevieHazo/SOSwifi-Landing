@@ -152,10 +152,14 @@ export default async function handler(req, res) {
       return res.status(200).send("Already authenticated");
     }
 
-    return res.redirect(
-      302,
-      `/?session=${encodeURIComponent(sessionId)}`
-    );
+    return res.status(200).json({
+  rawQuery: req.query,
+  parsed,
+  clientip,
+  clientmac,
+  hid,
+  tok
+});
   } catch (err) {
     return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
