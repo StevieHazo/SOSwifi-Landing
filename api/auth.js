@@ -29,7 +29,12 @@ export default async function handler(req, res) {
   if (ip) {
     const linkedSession = await redis.get(`paid:ip:${ip}`);
     if (linkedSession) {
-      return res.status(200).json({ ok: true, session: linkedSession });
+      return res.status(200).json({
+      ok: true,
+      sessiontimeout: 300,
+      uploadrate: 1500,
+      downloadrate: 1500
+});
     }
   }
 
