@@ -9,20 +9,30 @@ export default async function handler(req, res) {
   const sessionId = safe(req.query.session);
   const ip = safe(req.query.ip);
 
+  // ✅ 1. Primary: session
   if (sessionId) {
     const paid = await redis.get(`paid:session:${sessionId}`);
-    return res.status(200).json({ ok: paid === "paid" });
+    if (paid === "paid") {
+      return res.status(200).json({ ok: true });
+    }
   }
 
+  // ✅ 2. Secondary: MAC (normalized key)
   if (mac) {
-    const paid = await redis.get(`mac:${mac}`);
-    return res.status(200).json({ ok: paid === "paid" });
+    const paid = await redis.get(`auth:mac:${mac}`);
+    if (paid === "paid") {
+      return res.status(200).json({ ok: true });
+    }
   }
 
+  // ✅ 3. Fallback: IP
   if (ip) {
     const linkedSession = await redis.get(`paid:ip:${ip}`);
-    return res.status(200).json({ ok: !!linkedSession, session: linkedSession || null });
+    if (linkedSession) {
+      return res.status(200).json({ ok: true, session: linkedSession });
+    }
   }
 
-  return res.status(400).json({ ok: false, error: "Missing session, mac, or ip" });
+  // ❌ Not authorized
+  return res.status(200).json({ ok: false });
 }
