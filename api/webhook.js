@@ -30,18 +30,22 @@ export default async function handler(req, res) {
     const ip = String(session.metadata?.ip || "").trim();
     const mac = String(session.metadata?.mac || "").trim();
 
+    // ✅ Primary: session-based auth
     if (sessionId) {
       await redis.set(`paid:session:${sessionId}`, "paid", { ex: 3600 });
     }
 
+    // ✅ Router binding (IP fallback)
     if (ip) {
       await redis.set(`paid:ip:${ip}`, sessionId || "paid", { ex: 3600 });
     }
 
+    // ✅ Normalized MAC key (future-safe)
     if (mac) {
-      await redis.set(`mac:${mac}`, "paid", { ex: 3600 });
+      await redis.set(`auth:mac:${mac}`, "paid", { ex: 3600 });
     }
 
+    // ✅ Update stored client object
     if (sessionId) {
       const client = await redis.get(`client:${sessionId}`);
       if (client) {
