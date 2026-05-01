@@ -91,10 +91,20 @@ export default async function handler(req, res) {
       { ex: 3600 }
     );
 
+    // ✅ NEW: check if already paid
+    const alreadyPaidSession = await redis.get(`paid:session:${sessionId}`);
+    const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
+
+    if (alreadyPaidSession === "paid" || alreadyPaidIP) {
+      return res.status(200).send("Already authenticated");
+    }
+
+    // ✅ CHANGED: redirect to landing page instead of pay.html
     return res.redirect(
       302,
-      `/pay.html?plan=standard&session=${encodeURIComponent(sessionId)}`
+      `/?session=${encodeURIComponent(sessionId)}`
     );
+
   } catch (err) {
     return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
