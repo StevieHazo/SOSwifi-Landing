@@ -63,21 +63,25 @@ export default async function handler(req, res) {
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
-    if (paidSession === "paid" || paidIP) {
-      return res.status(200).send(`<!doctype html>
+ if (paidSession === "paid" || paidIP) {
+  const joiner = authaction.includes("?") ? "&" : "?";
+  const finalAuthUrl =
+    `${authaction}${joiner}tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}`;
+
+  return res.status(200).send(`<!doctype html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Connecting</title>
   <script>
     setTimeout(function () {
-      window.location.href = ${JSON.stringify(authaction)};
+      window.location.href = ${JSON.stringify(finalAuthUrl)};
     }, 300);
   </script>
 </head>
 <body>Connecting...</body>
 </html>`);
-    }
+}
 
     return res.status(200).send(`<!doctype html>
 <html>
