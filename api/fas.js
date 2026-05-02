@@ -13,6 +13,15 @@ function makeSessionId(input) {
     .slice(0, 32);
 }
 
+function extractClientIp(authaction) {
+  try {
+    const decoded = decodeURIComponent(authaction || "");
+    return safe(decoded.match(/clientip=([^&]+)/)?.[1]);
+  } catch {
+    return "";
+  }
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === "POST") {
@@ -29,16 +38,13 @@ export default async function handler(req, res) {
     }
 
     const authaction = safe(req.query.authaction);
-    const tok = safe(req.query.tok);
     const redir = safe(req.query.redir) || "http://neverssl.com/";
     const gatewayname = safe(req.query.gatewayname);
 
-    const clientip = safe(
-      decodeURIComponent(authaction).match(/clientip=([^&]+)/)?.[1]
-    );
+    const clientip = extractClientIp(authaction);
 
-    if (!clientip) {
-      return res.status(200).send("Missing IP");
+    if (!clientip || !authaction) {
+      return res.status(200).send("Missing params");
     }
 
     const sessionId = makeSessionId(clientip);
@@ -47,7 +53,6 @@ export default async function handler(req, res) {
       sessionId,
       ip: clientip,
       clientip,
-      tok,
       authaction,
       redir,
       gatewayname,
@@ -61,16 +66,21 @@ export default async function handler(req, res) {
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
     if (paidSession === "paid" || paidIP) {
-      if (!authaction || !tok) {
-        return res.status(200).send("Missing auth params");
-      }
-
-      const joiner = authaction.includes("?") ? "&" : "?";
-      const authUrl =
-        `${authaction}${joiner}tok=${encodeURIComponent(tok)}` +
-        `&redir=${encodeURIComponent(redir)}`;
-
-      return res.redirect(302, authUrl);
+      return res.status(200).send(`
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connecting</title>
+  <script>
+    setTimeout(() => {
+      window.location.href = ${JSON.stringify(authaction)};
+    }, 300);
+  </script>
+</head>
+<body>Connecting...</body>
+</html>
+      `);
     }
 
     return res.status(200).send(`
