@@ -20,32 +20,36 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== "GET") {
+      res.setHeader("Allow", "GET, POST");
       return res.status(405).send("Method Not Allowed");
     }
 
-    // 🔹 Extract ONLY what is reliable
+    if (safe(req.query.status) === "authenticated") {
+      return res.status(200).send("Already authenticated");
+    }
+
     const authaction = safe(req.query.authaction);
     const tok = safe(req.query.tok);
+    const redir = safe(req.query.redir) || "http://neverssl.com/";
     const gatewayname = safe(req.query.gatewayname);
 
-    // 🔹 Extract IP from authaction (MAIN SOURCE)
     const clientip = safe(
-      authaction.match(/clientip=([^&]+)/)?.[1]
+      decodeURIComponent(authaction).match(/clientip=([^&]+)/)?.[1]
     );
 
-    // 🔴 Hard fail if no IP (avoid broken sessions)
     if (!clientip) {
       return res.status(200).send("Missing IP");
     }
 
-    // 🔹 Stable session (IP + token)
-    const sessionId = makeSessionId(`${clientip}`);
+    const sessionId = makeSessionId(clientip);
 
-    // 🔹 Store client
     const clientRecord = {
       sessionId,
       ip: clientip,
+      clientip,
       tok,
+      authaction,
+      redir,
       gatewayname,
       createdAt: Date.now()
     };
@@ -53,42 +57,38 @@ export default async function handler(req, res) {
     await redis.set(`client:${sessionId}`, clientRecord, { ex: 3600 });
     await redis.set(`clientip:${clientip}`, sessionId, { ex: 3600 });
 
-    // 🔹 Check payment
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
-    // ✅ IF PAID → RELEASE TO INTERNET (IMPORTANT)
-if (paidSession === "paid" || paidIP) {
-  return res.status(200).send(`
-  <html>
-  <head>
-  <script>
-    setTimeout(() => {
-      window.location.href = "http://neverssl.com/";
-    }, 500);
-  </script>
-  </head>
-  <body>Connecting...</body>
-  </html>
-  `);
-}
+    if (paidSession === "paid" || paidIP) {
+      if (!authaction || !tok) {
+        return res.status(200).send("Missing auth params");
+      }
 
-// NOT PAID
-return res.status(200).send(`
+      const joiner = authaction.includes("?") ? "&" : "?";
+      const authUrl =
+        `${authaction}${joiner}tok=${encodeURIComponent(tok)}` +
+        `&redir=${encodeURIComponent(redir)}`;
+
+      return res.redirect(302, authUrl);
+    }
+
+    return res.status(200).send(`
+<!doctype html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-  setTimeout(() => {
-    window.location.href = "https://soswifi.uk/?session=${sessionId}";
-  }, 500);
-</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting</title>
+  <script>
+    setTimeout(() => {
+      window.location.href = "https://soswifi.uk/?session=${encodeURIComponent(sessionId)}";
+    }, 300);
+  </script>
 </head>
 <body>Redirecting...</body>
 </html>
-`);
-
+    `);
   } catch (err) {
-    return res.status(500).send("FAS error");
+    return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
 }
