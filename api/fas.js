@@ -13,33 +13,20 @@ function makeSessionId(input) {
     .slice(0, 32);
 }
 
-function extractClientIp(authaction) {
-  try {
-    const decoded = decodeURIComponent(authaction || "");
-    const match = decoded.match(/clientip=([^&]+)/);
-    return safe(match ? match[1] : "");
-  } catch {
-    return "";
-  }
-}
-
 export default async function handler(req, res) {
   try {
-    if (req.method === "POST") {
-      return res.status(200).send("*");
-    }
-
     if (req.method !== "GET") {
-      res.setHeader("Allow", "GET, POST");
+      res.setHeader("Allow", "GET");
       return res.status(405).send("Method Not Allowed");
     }
 
     const authaction = safe(req.query.authaction);
-    const redir =
-      safe(req.query.redir) ||
-      "http://captive.apple.com/hotspot-detect.html";
+    const tok = safe(req.query.tok);
+    const redir = safe(req.query.redir || "http://neverssl.com/");
     const gatewayname = safe(req.query.gatewayname);
-    const clientip = extractClientIp(authaction);
+
+    const clientipMatch = authaction.match(/clientip=([^&]+)/);
+    const clientip = safe(clientipMatch ? decodeURIComponent(clientipMatch[1]) : "");
 
     if (!authaction || !clientip) {
       return res.status(200).send("Missing params");
@@ -47,55 +34,30 @@ export default async function handler(req, res) {
 
     const sessionId = makeSessionId(clientip);
 
-    const clientRecord = {
+    await redis.set(`client:${sessionId}`, {
       sessionId,
-      ip: clientip,
       clientip,
       authaction,
+      tok,
       redir,
       gatewayname,
       createdAt: Date.now()
-    };
+    }, { ex: 3600 });
 
-    await redis.set(`client:${sessionId}`, clientRecord, { ex: 3600 });
     await redis.set(`clientip:${clientip}`, sessionId, { ex: 3600 });
 
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
- if (paidSession === "paid" || paidIP) {
-  const joiner = authaction.includes("?") ? "&" : "?";
-  const finalAuthUrl =
-    `${authaction}${joiner}tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}`;
+    if (paidSession === "paid" || paidIP) {
+      const joiner = authaction.includes("?") ? "&" : "?";
+      const finalAuthUrl =
+        `${authaction}${joiner}tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}`;
 
-  return res.status(200).send(`<!doctype html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Connecting</title>
-  <script>
-    setTimeout(function () {
-      window.location.href = ${JSON.stringify(finalAuthUrl)};
-    }, 300);
-  </script>
-</head>
-<body>Connecting...</body>
-</html>`);
-}
+      return res.redirect(302, finalAuthUrl);
+    }
 
-    return res.status(200).send(`<!doctype html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Redirecting</title>
-  <script>
-    setTimeout(function () {
-      window.location.href = "https://soswifi.uk/?session=${encodeURIComponent(sessionId)}";
-    }, 300);
-  </script>
-</head>
-<body>Redirecting...</body>
-</html>`);
+    return res.redirect(302, `https://soswifi.uk/?session=${encodeURIComponent(sessionId)}`);
   } catch (err) {
     return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
