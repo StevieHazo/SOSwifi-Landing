@@ -33,17 +33,12 @@ export default async function handler(req, res) {
       return res.status(405).send("Method Not Allowed");
     }
 
-    if (safe(req.query.status) === "authenticated") {
-      return res.status(200).send("Already authenticated");
-    }
-
     const authaction = safe(req.query.authaction);
-    const redir = safe(req.query.redir) || "http://neverssl.com/";
+    const redir = safe(req.query.redir) || "http://captive.apple.com/hotspot-detect.html";
     const gatewayname = safe(req.query.gatewayname);
-
     const clientip = extractClientIp(authaction);
 
-    if (!clientip || !authaction) {
+    if (!authaction || !clientip) {
       return res.status(200).send("Missing params");
     }
 
@@ -99,6 +94,6 @@ export default async function handler(req, res) {
 </html>
     `);
   } catch (err) {
-    return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
+    return res.status(500).send(\`FAS error: \${err?.message || "Unknown error"}\`);
   }
 }
