@@ -61,6 +61,9 @@ export default async function handler(req, res) {
     const clientipFromAuth = safe((req.query.authaction || "").match(/clientip=([^&]+)/)?.[1]);
     
     const clientip = safe(parsed.clientip || req.query.clientip || clientipFromAuth);
+    if (!clientip) {
+  return res.redirect(302, "http://neverssl.com/");
+}
     const clientmac = safe(parsed.clientmac || req.query.clientmac);
     const gatewayname = safe(parsed.gatewayname || req.query.gatewayname);
     const gatewayaddress = safe(parsed.gatewayaddress || req.query.gatewayaddress);
@@ -109,7 +112,7 @@ export default async function handler(req, res) {
     const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
   if (alreadyPaidSession === "paid" || alreadyPaidIP) {
-  return res.status(200).send("OK");
+  return res.redirect(302, "http://neverssl.com/");
 }
 
     return res.redirect(
