@@ -113,9 +113,14 @@ export default async function handler(req, res) {
 
   if (alreadyPaidSession === "paid" || alreadyPaidIP) {
   const authUrl = safe(req.query.authaction);
+  const tok = safe(req.query.tok);
 
-  if (authUrl) {
-    return res.redirect(302, authUrl);
+  if (authUrl && tok) {
+    const separator = authUrl.includes("?") ? "&" : "?";
+    return res.redirect(
+      302,
+      `${authUrl}${separator}tok=${encodeURIComponent(tok)}`
+    );
   }
 
   return res.redirect(302, "http://neverssl.com/");
