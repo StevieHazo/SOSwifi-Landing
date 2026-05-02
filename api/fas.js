@@ -49,13 +49,13 @@ export default async function handler(req, res) {
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
-    if (paidSession === "paid" || paidIP) {
+    /*if (paidSession === "paid" || paidIP) {
       const joiner = authaction.includes("?") ? "&" : "?";
       const finalAuthUrl =
         `${authaction}${joiner}tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}`;
 
       return res.redirect(302, finalAuthUrl);
-    }
+    }*/
 
     return res.redirect(302, `https://soswifi.uk/?session=${encodeURIComponent(sessionId)}`);
   } catch (err) {
