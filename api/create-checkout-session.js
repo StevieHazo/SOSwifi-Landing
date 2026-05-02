@@ -39,8 +39,23 @@ export default async function handler(req, res) {
     if (!ip) {
       return res.status(400).json({ error: "Session missing client IP" });
     }
+    // 🔥 TEST MODE (remove later)
+await redis.set(`paid:session:${sessionId}`, "paid", { ex: 3600 });
 
-    const metadata = {
+if (ip) {
+  await redis.set(`paid:ip:${ip}`, sessionId, { ex: 3600 });
+}
+
+if (mac) {
+  await redis.set(`auth:mac:${mac}`, "paid", { ex: 3600 });
+}
+
+// Skip Stripe → go directly to success
+return res.status(200).json({
+  url: `${baseUrl}/success?session=${sessionId}`
+});
+/*
+const metadata = {
       sessionId,
       priceId,
       ip,
@@ -67,7 +82,7 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ url: checkoutSession.url });
+    return res.status(200).json({ url: checkoutSession.url }); */
   } catch (err) {
     return res.status(500).json({
       error: err?.message || "Internal Server Error"
