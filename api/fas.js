@@ -106,15 +106,8 @@ export default async function handler(req, res) {
     const alreadyPaidSession = await redis.get(`paid:session:${sessionId}`);
     const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
-    if (alreadyPaidSession === "paid" || alreadyPaidIP) {
-  if (authdir && tok) {
-    return res.redirect(
-      302,
-      `${authdir}?tok=${encodeURIComponent(tok)}`
-    );
-  }
-
-  return res.status(200).send("Missing auth params");
+  if (alreadyPaidSession === "paid" || alreadyPaidIP) {
+  return res.status(200).send("OK");
 }
 
     return res.redirect(
