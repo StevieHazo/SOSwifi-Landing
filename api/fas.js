@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     }
 
     // 🔹 Stable session (IP + token)
-    const sessionId = makeSessionId(`${clientip}|${tok}`);
+    const sessionId = makeSessionId(`${clientip}`);
 
     // 🔹 Store client
     const clientRecord = {
