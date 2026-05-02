@@ -54,7 +54,7 @@ if (mac) {
 return res.status(200).json({
   url: `${baseUrl}/success?session=${sessionId}`
 });
-/*
+
 const metadata = {
       sessionId,
       priceId,
@@ -82,7 +82,7 @@ const metadata = {
       });
     }
 
-    return res.status(200).json({ url: checkoutSession.url }); */
+    return res.status(200).json({ url: checkoutSession.url }); 
   } catch (err) {
     return res.status(500).json({
       error: err?.message || "Internal Server Error"
