@@ -50,28 +50,9 @@
 
   <!-- 🔥 IMPORTANT: re-trigger openNDS -->
 <script>
-  async function finalizeAccess() {
-    try {
-      // 1. Tell backend payment is complete
-      await fetch("/api/activate-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session: new URLSearchParams(window.location.search).get("session")
-        })
-      });
-
-    } catch (e) {
-      console.log("Activation failed, still continuing redirect", e);
-    }
-
-    // 2. Give backend a small buffer time (important for Redis + OpenNDS sync)
-    setTimeout(() => {
-      window.location.href = "http://neverssl.com/";
-    }, 1200);
-  }
-
-  finalizeAccess();
+  setTimeout(() => {
+    window.location.href = "http://neverssl.com/";
+  }, 1200);
 </script>
 </head>
 <body>
