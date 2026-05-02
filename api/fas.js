@@ -16,7 +16,8 @@ function makeSessionId(input) {
 function extractClientIp(authaction) {
   try {
     const decoded = decodeURIComponent(authaction || "");
-    return safe(decoded.match(/clientip=([^&]+)/)?.[1]);
+    const match = decoded.match(/clientip=([^&]+)/);
+    return safe(match ? match[1] : "");
   } catch {
     return "";
   }
@@ -34,7 +35,9 @@ export default async function handler(req, res) {
     }
 
     const authaction = safe(req.query.authaction);
-    const redir = safe(req.query.redir) || "http://captive.apple.com/hotspot-detect.html";
+    const redir =
+      safe(req.query.redir) ||
+      "http://captive.apple.com/hotspot-detect.html";
     const gatewayname = safe(req.query.gatewayname);
     const clientip = extractClientIp(authaction);
 
@@ -61,39 +64,35 @@ export default async function handler(req, res) {
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
     if (paidSession === "paid" || paidIP) {
-      return res.status(200).send(`
-<!doctype html>
+      return res.status(200).send(`<!doctype html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Connecting</title>
   <script>
-    setTimeout(() => {
+    setTimeout(function () {
       window.location.href = ${JSON.stringify(authaction)};
     }, 300);
   </script>
 </head>
 <body>Connecting...</body>
-</html>
-      `);
+</html>`);
     }
 
-    return res.status(200).send(`
-<!doctype html>
+    return res.status(200).send(`<!doctype html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Redirecting</title>
   <script>
-    setTimeout(() => {
+    setTimeout(function () {
       window.location.href = "https://soswifi.uk/?session=${encodeURIComponent(sessionId)}";
     }, 300);
   </script>
 </head>
 <body>Redirecting...</body>
-</html>
-    `);
+</html>`);
   } catch (err) {
-    return res.status(500).send(\`FAS error: \${err?.message || "Unknown error"}\`);
+    return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
 }
