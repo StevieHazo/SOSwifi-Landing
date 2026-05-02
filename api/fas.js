@@ -107,8 +107,15 @@ export default async function handler(req, res) {
     const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (alreadyPaidSession === "paid" || alreadyPaidIP) {
-      return res.status(200).send("Already authenticated");
-    }
+  if (authdir && clientip) {
+    return res.redirect(
+      302,
+      `${authdir}?ip=${encodeURIComponent(clientip)}`
+    );
+  }
+
+  return res.status(200).send("Auth fallback");
+}
 
     return res.redirect(
       302,
