@@ -58,7 +58,9 @@ export default async function handler(req, res) {
     const rawFas = safe(req.query.fas);
     const parsed = rawFas ? parseFasPayload(rawFas) : {};
 
-    const clientip = safe(parsed.clientip || req.query.clientip);
+    const clientipFromAuth = safe((req.query.authaction || "").match(/clientip=([^&]+)/)?.[1]);
+    
+    const clientip = safe(parsed.clientip || req.query.clientip || clientipFromAuth);
     const clientmac = safe(parsed.clientmac || req.query.clientmac);
     const gatewayname = safe(parsed.gatewayname || req.query.gatewayname);
     const gatewayaddress = safe(parsed.gatewayaddress || req.query.gatewayaddress);
