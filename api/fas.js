@@ -58,23 +58,23 @@ export default async function handler(req, res) {
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
     // ✅ IF PAID → RELEASE TO INTERNET (IMPORTANT)
-    return res.status(200).send(`
-<html>
-<head>
-<script>
-  setTimeout(() => {
-    window.location.href = "http://neverssl.com/";
-  }, 500);
-</script>
-</head>
-<body>
-Connected...
-</body>
-</html>
-`);
+if (paidSession === "paid" || paidIP) {
+  return res.status(200).send(`
+  <html>
+  <head>
+  <script>
+    setTimeout(() => {
+      window.location.href = "http://neverssl.com/";
+    }, 500);
+  </script>
+  </head>
+  <body>Connecting...</body>
+  </html>
+  `);
+}
 
-    // ❌ NOT PAID → go to portal
-    return res.status(200).send(`
+// NOT PAID
+return res.status(200).send(`
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,9 +84,7 @@ Connected...
   }, 500);
 </script>
 </head>
-<body>
-Redirecting...
-</body>
+<body>Redirecting...</body>
 </html>
 `);
 
