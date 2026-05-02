@@ -58,15 +58,37 @@ export default async function handler(req, res) {
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
     // ✅ IF PAID → RELEASE TO INTERNET (IMPORTANT)
-    if (paidSession === "paid" || paidIP) {
-      return res.redirect(302, "http://neverssl.com/");
-    }
+    return res.status(200).send(`
+<html>
+<head>
+<script>
+  setTimeout(() => {
+    window.location.href = "http://neverssl.com/";
+  }, 500);
+</script>
+</head>
+<body>
+Connected...
+</body>
+</html>
+`);
 
     // ❌ NOT PAID → go to portal
-    return res.redirect(
-      302,
-      `https://soswifi.uk/?session=${sessionId}`
-    );
+    return res.status(200).send(`
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  setTimeout(() => {
+    window.location.href = "https://soswifi.uk/?session=${sessionId}";
+  }, 500);
+</script>
+</head>
+<body>
+Redirecting...
+</body>
+</html>
+`);
 
   } catch (err) {
     return res.status(500).send("FAS error");
