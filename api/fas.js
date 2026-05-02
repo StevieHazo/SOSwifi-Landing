@@ -112,6 +112,12 @@ export default async function handler(req, res) {
     const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
   if (alreadyPaidSession === "paid" || alreadyPaidIP) {
+  const authUrl = safe(req.query.authaction);
+
+  if (authUrl) {
+    return res.redirect(302, authUrl);
+  }
+
   return res.redirect(302, "http://neverssl.com/");
 }
 
