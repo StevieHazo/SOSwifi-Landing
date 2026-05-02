@@ -107,14 +107,14 @@ export default async function handler(req, res) {
     const alreadyPaidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (alreadyPaidSession === "paid" || alreadyPaidIP) {
-  if (clientip) {
+  if (authdir && tok) {
     return res.redirect(
       302,
-      `http://192.168.3.1:2050/opennds_auth/?ip=${encodeURIComponent(clientip)}`
+      `${authdir}?tok=${encodeURIComponent(tok)}`
     );
   }
 
-  return res.status(200).send("Auth fallback");
+  return res.status(200).send("Missing auth params");
 }
 
     return res.redirect(
