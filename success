@@ -5,7 +5,6 @@
   <title>You're connected</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Keep everything inline to avoid blocked assets -->
   <style>
     body {
       margin: 0;
@@ -48,6 +47,14 @@
       opacity: 0.75;
     }
   </style>
+
+  <!-- 🔥 IMPORTANT: re-trigger openNDS -->
+  <script>
+    setTimeout(() => {
+      window.location.href = "http://192.168.3.1:2050/";
+    }, 1200);
+  </script>
+
 </head>
 <body>
 
@@ -56,18 +63,17 @@
     <h1>You’re online</h1>
 
     <p>
-      Your payment was successful and Wi‑Fi access is now active.
+      Your payment was successful and Wi-Fi access is now activating.
     </p>
 
     <p>
-      You can close this page and open any website or app to get started.
+      Please wait a moment…
     </p>
 
     <div class="hint">
-      If the connection doesn’t work immediately, try opening a new tab or refreshing once.
+      You will be connected automatically.
     </div>
   </div>
 
 </body>
 </html>
-``
