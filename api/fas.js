@@ -73,9 +73,9 @@ export default async function handler(req, res) {
     );
     const tok = safe(parsed.tok || req.query.tok);
 
-    const sessionId = makeSessionId(
-      [clientip, gatewayname, gatewayaddress, originurl].join("|")
-    );
+   const sessionId = makeSessionId(
+  [clientip, tok].join("|")
+);
 
     const rhid = hid ? sha256(hid + FASKEY) : "";
 
