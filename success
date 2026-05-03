@@ -50,13 +50,7 @@
 
   <!-- 🔥 IMPORTANT: re-trigger openNDS -->
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const session = params.get("session");
-
-  // stay on page briefly, then call FAS
-  setTimeout(() => {
-    window.location.replace(`/api/fas?session=${session}`);
-  }, 500);
+  document.body.innerHTML = "Payment successful. Please reconnect WiFi to continue.";
 </script>
 </head>
 <body>
