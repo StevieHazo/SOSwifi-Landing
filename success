@@ -50,7 +50,9 @@
 
   <!-- 🔥 IMPORTANT: re-trigger openNDS -->
 <script>
-  window.location.href = "/api/fas";
+  const params = new URLSearchParams(window.location.search);
+  const session = params.get("session");
+  window.location.href = `/api/fas?session=${session}`;
 </script>
 </head>
 <body>
