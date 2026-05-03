@@ -50,8 +50,44 @@
 
   <!-- 🔥 IMPORTANT: re-trigger openNDS -->
 <script>
-  document.body.innerHTML = "Payment successful. Please reconnect WiFi to continue.";
-</script>
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session');
+      const hint = document.querySelector('.hint');
+      const card = document.querySelector('.card');
+
+      if (!sessionId) {
+        hint.innerHTML = "<span style='color:#ef4444'>Error: Session lost. Reconnect to WiFi.</span>";
+        return;
+      }
+
+      const fasUrl = `/api/fas?session=${encodeURIComponent(sessionId)}`;
+      let timeLeft = 5;
+
+      const countdown = setInterval(() => {
+        timeLeft--;
+        hint.innerHTML = `Verifying payment in ${timeLeft}s...`;
+
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          
+          // Update the UI to show the manual connection button
+          hint.innerHTML = "Verification complete.";
+          
+          // Create the "Connect" button dynamically
+          const btn = document.createElement('a');
+          btn.href = fasUrl;
+          btn.innerHTML = "ACTIVATE CONNECTION";
+          btn.style.cssText = "display:block; margin-top:20px; padding:16px; background:#10b981; color:white; text-decoration:none; border-radius:8px; font-weight:bold; font-size:1.1rem;";
+          
+          card.appendChild(btn);
+
+          // Try automatic redirect (might be blocked, which is why we show the button)
+          window.location.href = fasUrl;
+        }
+      }, 1000);
+    };
+  </script>
 </head>
 <body>
 
