@@ -52,7 +52,11 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const session = params.get("session");
-  window.location.href = `/api/fas?session=${session}`;
+
+  // stay on page briefly, then call FAS
+  setTimeout(() => {
+    window.location.replace(`/api/fas?session=${session}`);
+  }, 500);
 </script>
 </head>
 <body>
