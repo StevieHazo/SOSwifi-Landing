@@ -102,14 +102,25 @@ export default async function handler(req, res) {
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (paidSession === "paid" || paidIP) {
-      const finalAuthUrl = buildFinalAuthUrl({
-        authaction,
-        tok,
-        redir
-      });
+       const finalAuthUrl = buildFinalAuthUrl({ authaction, tok, redir });
 
-      res.setHeader("Cache-Control", "no-store");
-      return res.redirect(302, finalAuthUrl);
+  res.setHeader("Content-Type", "text/html");
+  res.setHeader("Cache-Control", "no-store");
+  
+  return res.send(`
+    <html>
+      <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+      <body style="text-align:center; font-family:sans-serif; padding:50px 20px;">
+        <h2 style="color:#2ecc71;">Payment Verified!</h2>
+        <p>Your 1-hour session is ready.</p>
+        <a href="${finalAuthUrl}" 
+           style="display:inline-block; margin-top:20px; padding:20px 40px; background:#2ecc71; color:white; text-decoration:none; border-radius:10px; font-weight:bold; font-size:1.2rem;">
+           START BROWSING
+        </a>
+        <p style="margin-top:30px; font-size:0.8rem; color:#666;">Clicking the button will activate your internet and close this window.</p>
+      </body>
+    </html>
+  `);
     }
 
     res.setHeader("Cache-Control", "no-store");
