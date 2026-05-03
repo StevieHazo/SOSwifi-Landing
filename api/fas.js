@@ -67,7 +67,16 @@ export default async function handler(req, res) {
 
     // ✅ PAID → AUTHENTICATE
     if (paidSession === "paid" || paidIP) {
-      return res.redirect(302, `${authaction}&tok=${tok}`);
+     return res.status(200).send(`
+<html>
+<head>
+<script>
+  window.location.href = "${authaction}&tok=${tok}";
+</script>
+</head>
+<body>Connecting...</body>
+</html>
+`);
     }
 
     // ❌ NOT PAID → PORTAL
