@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 <html>
 <head>
 <script>
-  window.location.replace("${authaction}&tok=${tok}");
+  window.open("${authaction}&tok=${tok}", "_self");
 </script>
 </head>
 <body>Connecting...</body>
