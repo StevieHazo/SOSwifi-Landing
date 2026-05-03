@@ -13,6 +13,20 @@ function makeSessionId(input) {
     .slice(0, 32);
 }
 
+function extractClientIp(authaction) {
+  try {
+    const url = new URL(authaction);
+    return safe(url.searchParams.get("clientip"));
+  } catch {
+    return safe(authaction.match(/clientip=([^&]+)/)?.[1]);
+  }
+}
+
+function buildFinalAuthUrl({ authaction, tok, redir }) {
+  const joiner = authaction.includes("?") ? "&" : "?";
+  return `${authaction}${joiner}tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=`;
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method === "POST") {
@@ -20,71 +34,76 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== "GET") {
+      res.setHeader("Allow", "GET, POST");
       return res.status(405).send("Method Not Allowed");
     }
 
-    let authaction = safe(req.query.authaction);
-    let tok = safe(req.query.tok);
-    let clientip = "";
     let sessionId = safe(req.query.session);
 
-    // 🔴 CASE 1: FIRST HIT (from router)
+    // CASE 1: first hit from openNDS router
     if (!sessionId) {
-      clientip = safe(authaction.match(/clientip=([^&]+)/)?.[1]);
+      const authaction = safe(req.query.authaction);
+      const tok = safe(req.query.tok);
+      const redir = safe(req.query.redir);
+      const gatewayname = safe(req.query.gatewayname);
+      const clientip = extractClientIp(authaction);
 
-      if (!authaction || !tok || !clientip) {
+      if (!authaction || !tok || !redir || !clientip) {
         return res.status(200).send("Missing params");
       }
 
       sessionId = makeSessionId(clientip);
 
-      // store client
-      await redis.set(
-        `client:${sessionId}`,
-        {
-          sessionId,
-          ip: clientip,
-          tok,
-          authaction,
-          createdAt: Date.now()
-        },
-        { ex: 3600 }
-      );
+      const clientRecord = {
+        sessionId,
+        ip: clientip,
+        tok,
+        redir,
+        authaction,
+        gatewayname,
+        createdAt: Date.now()
+      };
 
+      await redis.set(`client:${sessionId}`, clientRecord, { ex: 3600 });
       await redis.set(`clientip:${clientip}`, sessionId, { ex: 3600 });
 
-      // 🔁 redirect to portal (IMPORTANT: 302)
       return res.redirect(
         302,
-        `https://soswifi.uk/?session=${sessionId}`
+        `https://soswifi.uk/?session=${encodeURIComponent(sessionId)}`
       );
     }
 
-    // 🔴 CASE 2: AFTER PAYMENT (/api/fas?session=...)
+    // CASE 2: later hit using stored session
     const client = await redis.get(`client:${sessionId}`);
     if (!client) {
       return res.status(200).send("Invalid session");
     }
 
-    authaction = client.authaction;
-    tok = client.tok;
-    clientip = client.ip;
+    const clientip = safe(client.ip);
+    const authaction = safe(client.authaction);
+    const tok = safe(client.tok);
+    const redir = safe(client.redir || "https://soswifi.uk/success");
 
     const paidSession = await redis.get(`paid:session:${sessionId}`);
-    const paidIP = await redis.get(`paid:ip:${clientip}`);
+    const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
-    // ✅ PAID → AUTHENTICATE (HTML, NOT 302)
+    // PAID -> send to openNDS auth URL
     if (paidSession === "paid" || paidIP) {
-      return res.redirect(302, `${authaction}&tok=${tok}`);
+      const finalAuthUrl = buildFinalAuthUrl({
+        authaction,
+        tok,
+        redir
+      });
+
+      return res.redirect(302, finalAuthUrl);
     }
 
-    // ❌ NOT PAID → back to portal
+    // NOT PAID -> back to portal
     return res.redirect(
       302,
-      `https://soswifi.uk/?session=${sessionId}`
+      `https://soswifi.uk/?session=${encodeURIComponent(sessionId)}`
     );
-
   } catch (err) {
-    return res.status(500).send("FAS error");
+    return res.status(500).send(`FAS error: ${err?.message || "Unknown error"}`);
   }
 }
