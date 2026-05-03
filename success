@@ -50,9 +50,7 @@
 
   <!-- 🔥 IMPORTANT: re-trigger openNDS -->
 <script>
-  setTimeout(() => {
-    window.location.href = "http://192.168.3.1:2050/";
-  }, 1200);
+  window.location.href = "/api/fas";
 </script>
 </head>
 <body>
