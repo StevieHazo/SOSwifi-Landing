@@ -24,18 +24,27 @@ export default async function handler(req, res) {
     }
 
     // 🔹 Extract required params (Level 4)
-    const authaction = safe(req.query.authaction);
-    const tok = safe(req.query.tok);
-    const gatewayname = safe(req.query.gatewayname);
+ let authaction = safe(req.query.authaction);
+let tok = safe(req.query.tok);
+let clientip = "";
 
-    // 🔹 Extract client IP from authaction
-    const clientip = safe(
-      authaction.match(/clientip=([^&]+)/)?.[1]
-    );
+// If params missing → try from stored session
+const sessionId = safe(req.query.session);
 
-    if (!authaction || !tok || !clientip) {
-      return res.status(200).send("Missing params");
-    }
+if ((!authaction || !tok) && sessionId) {
+  const client = await redis.get(`client:${sessionId}`);
+  if (client) {
+    authaction = client.authaction;
+    tok = client.tok;
+    clientip = client.ip;
+  }
+} else {
+  clientip = safe(authaction.match(/clientip=([^&]+)/)?.[1]);
+}
+
+if (!authaction || !tok || !clientip) {
+  return res.status(200).send("Missing params");
+}
 
     // 🔹 Stable session (IP based)
     const sessionId = makeSessionId(clientip);
