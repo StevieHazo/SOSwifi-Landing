@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       return res.status(200).send("Missing params");
     }
 
-    // 🔹 Stable session (IP only)
+    // 🔹 Stable session (IP-based)
     const sessionId = makeSessionId(clientip);
 
     // 🔹 Store client
@@ -56,38 +56,16 @@ export default async function handler(req, res) {
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = await redis.get(`paid:ip:${clientip}`);
 
-    // ✅ PAID → AUTHENTICATE VIA AUTHACTION
+    // ✅ PAID → AUTHENTICATE (ONLY THIS LINE MATTERS)
     if (paidSession === "paid" || paidIP) {
-      const finalAuthUrl = `${authaction}&tok=${tok}`;
-
-      return res.status(200).send(`
-      <html>
-      <head>
-      <script>
-        setTimeout(() => {
-          window.location.href = "${finalAuthUrl}";
-        }, 500);
-      </script>
-      </head>
-      <body>Connecting...</body>
-      </html>
-      `);
+      return res.redirect(302, authaction);
     }
 
-    // ❌ NOT PAID → GO TO PORTAL
-    return res.status(200).send(`
-    <html>
-    <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script>
-      setTimeout(() => {
-        window.location.href = "https://soswifi.uk/?session=${sessionId}";
-      }, 500);
-    </script>
-    </head>
-    <body>Redirecting...</body>
-    </html>
-    `);
+    // ❌ NOT PAID → REDIRECT TO PORTAL (NO JS)
+    return res.redirect(
+      302,
+      `https://soswifi.uk/?session=${sessionId}`
+    );
 
   } catch (err) {
     return res.status(500).send("FAS error");
