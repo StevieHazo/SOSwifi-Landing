@@ -105,29 +105,37 @@ export default async function handler(req, res) {
 
     if (paidSession === "paid" || paidIP) {
        const planRaw = await redis.get(`plan:ip:${clientip}`);
-  let plan = planRaw ? JSON.parse(planRaw) : null;
+  const plan = planRaw ? JSON.parse(planRaw) : { speed: 5000, expiry: Date.now() + 1200000 };
 
-  // Dynamic values from Redis
-  const drate = plan?.speed || 5000;
-  const urate = plan?.speed || 5000;
-  let timeout = 1200; 
-
-  if (plan?.expiry) {
-    timeout = Math.max(60, Math.floor((plan.expiry - Date.now()) / 1000));
-  }
-
-  // Pack them into the custom field for the Binauth script
-  const customStr = `${timeout},${drate},${urate}`;
-  const finalAuthUrl = `${extractAuthBase(authaction)}?tok=${tok}&redir=${redir}&custom=${customStr}`;
+  const timeout = Math.max(60, Math.floor((plan.expiry - Date.now()) / 1000));
+  const drate = plan.speed;
+  const urate = plan.speed;
 
   res.setHeader("Content-Type", "text/html");
   return res.send(`
     <html>
-      <body style="text-align:center; padding:50px;">
+      <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+      <body style="text-align:center; padding:50px 20px; font-family:sans-serif;">
         <h2>Payment Verified!</h2>
-        <a href="${finalAuthUrl}" style="background:#2ecc71; color:white; padding:20px; text-decoration:none; border-radius:10px; font-weight:bold;">
+        <p>Tap below to start your ${Math.floor(timeout/60)} min session.</p>
+        
+        <button id="connectBtn" 
+                data-base="${extractAuthBase(authaction)}"
+                data-tok="${tok}"
+                data-redir="${redir}"
+                data-custom="${timeout},${drate},${urate}"
+                style="display:inline-block; margin-top:20px; padding:20px 40px; background:#2ecc71; color:white; border:none; border-radius:10px; font-weight:bold; font-size:1.2rem; cursor:pointer;">
            START BROWSING
-        </a>
+        </button>
+
+        <script>
+          document.getElementById('connectBtn').onclick = function() {
+            const b = this.dataset;
+            // We build the URL locally in the browser to satisfy iOS security
+            const finalUrl = b.base + "?tok=" + b.tok + "&redir=" + b.redir + "&custom=" + b.custom;
+            window.location.href = finalUrl;
+          };
+        </script>
       </body>
     </html>
   `);
