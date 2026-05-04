@@ -32,8 +32,8 @@ function extractAuthBase(authaction) {
 }
 
 function buildFinalAuthUrl({ authaction, tok, redir, custom = "p1" }) {
-  // Append to original authaction, do NOT rebuild from base
-  return `${authaction}&tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${encodeURIComponent(custom)}`;
+const base = extractAuthBase(authaction);
+return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${encodeURIComponent(custom)}`;
 }
 
 export default async function handler(req, res) {
