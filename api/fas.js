@@ -104,29 +104,21 @@ export default async function handler(req, res) {
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (paidSession === "paid" || paidIP) {
-       // 1. Get the plan using the client IP
-  const planRaw = await redis.get(`plan:ip:${clientip}`);
+       const planRaw = await redis.get(`plan:ip:${clientip}`);
   let plan = planRaw ? JSON.parse(planRaw) : null;
 
-  // 2. Calculate limits (fallback to 5Mbps/5mins if plan missing)
-  const downloadrate = plan?.speed || 5000;
-  const uploadrate = plan?.speed || 5000;
-  let sessiontimeout = 300; 
+  // Dynamic values from Redis
+  const drate = plan?.speed || 5000;
+  const urate = plan?.speed || 5000;
+  let timeout = 1200; 
 
   if (plan?.expiry) {
-    sessiontimeout = Math.floor((plan.expiry - Date.now()) / 1000);
+    timeout = Math.max(60, Math.floor((plan.expiry - Date.now()) / 1000));
   }
-  if (sessiontimeout <= 0) sessiontimeout = 60; // Safety floor
 
-  // 3. Build the URL with the new limits
-  const finalAuthUrl = buildFinalAuthUrl({ 
-    authaction, 
-    tok, 
-    redir,
-    downloadrate,
-    uploadrate,
-    sessiontimeout
-  });
+  // Pack them into the custom field for the Binauth script
+  const customStr = `${timeout},${drate},${urate}`;
+  const finalAuthUrl = `${extractAuthBase(authaction)}?tok=${tok}&redir=${redir}&custom=${customStr}`;
 
   res.setHeader("Content-Type", "text/html");
   return res.send(`
