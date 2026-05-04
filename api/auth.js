@@ -9,11 +9,10 @@ export default async function handler(req, res) {
   const sessionId = safe(req.query.session);
   const ip = safe(req.query.ip);
 
-  // ✅ 1. Primary: session (keep for compatibility)
+  // ✅ 1. Primary: session (unchanged)
   if (sessionId) {
     const paid = await redis.get(`paid:session:${sessionId}`);
     if (paid === "paid") {
-      // fallback (rarely used now)
       return res.status(200).json({ ok: true });
     }
   }
@@ -26,10 +25,11 @@ export default async function handler(req, res) {
     }
   }
 
-  // ✅ 3. MAIN LOGIC → IP control
+  // ✅ 3. IP आधारित control (MAIN LOGIC)
   if (ip) {
     const sessionData = await redis.get(`paid:ip:${ip}`);
 
+    // 🔥 Phase 6 logic (after payment)
     if (sessionData && sessionData.speed && sessionData.expiry) {
       const now = Date.now();
       const remaining = Math.floor((sessionData.expiry - now) / 1000);
@@ -40,12 +40,22 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: false });
       }
 
-      // ✅ valid session
+      // ✅ valid session → apply speed + time
       return res.status(200).json({
         ok: true,
-        sessiontimeout: remaining,          // seconds
-        uploadrate: sessionData.speed,      // kbps
-        downloadrate: sessionData.speed     // kbps
+        sessiontimeout: remaining,
+        uploadrate: sessionData.speed,
+        downloadrate: sessionData.speed
+      });
+    }
+
+    // 🔥 IMPORTANT: fallback (pre-payment / legacy flow)
+    if (sessionData) {
+      return res.status(200).json({
+        ok: true,
+        sessiontimeout: 300,
+        uploadrate: 1500,
+        downloadrate: 1500
       });
     }
   }
