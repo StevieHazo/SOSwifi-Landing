@@ -33,7 +33,7 @@ function extractAuthBase(authaction) {
 
 function buildFinalAuthUrl({ authaction, tok, redir }) {
   const base = extractAuthBase(authaction);
-  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=`;
+  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&sessionlength=300&uploadrate=1500&downloadrate=1500&custom=`;
 }
 
 export default async function handler(req, res) {
