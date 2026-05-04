@@ -10,11 +10,11 @@ const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 // 🔥 Map Stripe price → speed + duration
 function getPlan(priceId) {
   switch (priceId) {
-    case "price_5":   // TODO replace with real ID
+    case "price_1TM8LkF9howUJR6PV4Ezswak":   // TODO replace with real ID
       return { speed: 5000, duration: 1200 }; // 5 Mbps, 20 mins
-    case "price_10":  // TODO replace
+    case "price_1TM8LkF9howUJR6PDVPAl0qe":  // TODO replace
       return { speed: 15000, duration: 1200 };
-    case "price_20":  // TODO replace
+    case "price_1TM8LkF9howUJR6PlQUXWWkr":  // TODO replace
       return { speed: 25000, duration: 1200 };
     default:
       return null;
