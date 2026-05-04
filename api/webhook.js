@@ -46,11 +46,11 @@ export default async function handler(req, res) {
 function getPlan(priceId) {
   switch (priceId) {
     case "price_1TM8LkF9howUJR6PV4Ezswak":   
-      return { speed: 5000, duration: 1200 };
+      return { speed: 5000, duration: 300 };
     case "price_1TM8LkF9howUJR6PDVPAl0qe":
-      return { speed: 15000, duration: 1200 };
+      return { speed: 15000, duration: 300 };
     case "price_1TM8LkF9howUJR6PlQUXWWkr":
-      return { speed: 25000, duration: 1200 };
+      return { speed: 25000, duration: 300 };
     default:
       return null;
   }
