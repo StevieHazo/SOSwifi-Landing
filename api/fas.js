@@ -31,21 +31,9 @@ function extractAuthBase(authaction) {
   }
 }
 
-function buildFinalAuthUrl({ authaction, tok, redir, downloadrate, uploadrate, sessiontimeout }) {
+function buildFinalAuthUrl({ authaction, tok, redir }) {
   const base = extractAuthBase(authaction);
-  
-  // openNDS v9.8 internal parameter names:
-  // sessionlength: minutes (NOT seconds)
-  // uploadrate: kb/s
-  // downloadrate: kb/s
-  
-  const minutes = Math.max(1, Math.floor(sessiontimeout / 60));
-
-  return `${base}?tok=${encodeURIComponent(tok)}` +
-         `&redir=${encodeURIComponent(redir)}` +
-         `&sessionlength=${minutes}` +
-         `&uploadrate=${uploadrate || 0}` +
-         `&downloadrate=${downloadrate || 0}`;
+  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=`;
 }
 
 export default async function handler(req, res) {
@@ -114,40 +102,22 @@ export default async function handler(req, res) {
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (paidSession === "paid" || paidIP) {
-       // Pull plan from Redis (or use defaults)
-  const planRaw = await redis.get(`plan:ip:${clientip}`);
-  const plan = planRaw ? JSON.parse(planRaw) : { speed: 5000, expiry: Date.now() + 1200000 };
+       const finalAuthUrl = buildFinalAuthUrl({ authaction, tok, redir });
 
-  const drate = plan.speed;
-  const timeout = Math.max(60, Math.floor((plan.expiry - Date.now()) / 1000));
-  
-  // Format: timeout,download,upload (comma-separated, NO spaces)
-  const customStr = `${timeout},${drate},${drate}`;
-  
-  // Construct the URL
-  const finalAuthUrl = `${extractAuthBase(authaction)}?tok=${tok}&redir=${encodeURIComponent(redir)}&custom=${customStr}`;
-
-    res.setHeader("Content-Type", "text/html");
-  // Add a Refresh header to force Safari to move if the user stalls
-  res.setHeader("Refresh", `5; url=${finalAuthUrl}`); 
+  res.setHeader("Content-Type", "text/html");
+  res.setHeader("Cache-Control", "no-store");
   
   return res.send(`
     <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="refresh" content="10;url=${finalAuthUrl}">
-      </head>
-      <body style="text-align:center; padding:50px 20px; font-family:sans-serif; background:#0f172a; color:white;">
-        <h2>Payment Verified!</h2>
-        <p>Redirecting you in a moment...</p>
+      <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+      <body style="text-align:center; font-family:sans-serif; padding:50px 20px;">
+        <h2 style="color:#2ecc71;">Payment Verified!</h2>
+        <p>Your 1-hour session is ready.</p>
         <a href="${finalAuthUrl}" 
-           style="display:inline-block; margin-top:20px; padding:20px 40px; background:#10b981; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">
-           START BROWSING NOW
+           style="display:inline-block; margin-top:20px; padding:20px 40px; background:#2ecc71; color:white; text-decoration:none; border-radius:10px; font-weight:bold; font-size:1.2rem;">
+           START BROWSING
         </a>
-        <script>
-          // Auto-click for Safari CNA compatibility
-          setTimeout(() => { window.location.href = "${finalAuthUrl}"; }, 500);
-        </script>
+        <p style="margin-top:30px; font-size:0.8rem; color:#666;">Clicking the button will activate your internet and close this window.</p>
       </body>
     </html>
   `);
