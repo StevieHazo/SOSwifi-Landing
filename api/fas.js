@@ -127,15 +127,27 @@ export default async function handler(req, res) {
   // Construct the URL
   const finalAuthUrl = `${extractAuthBase(authaction)}?tok=${tok}&redir=${encodeURIComponent(redir)}&custom=${customStr}`;
 
-  res.setHeader("Content-Type", "text/html");
+    res.setHeader("Content-Type", "text/html");
+  // Add a Refresh header to force Safari to move if the user stalls
+  res.setHeader("Refresh", `5; url=${finalAuthUrl}`); 
+  
   return res.send(`
     <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="refresh" content="10;url=${finalAuthUrl}">
+      </head>
       <body style="text-align:center; padding:50px 20px; font-family:sans-serif; background:#0f172a; color:white;">
         <h2>Payment Verified!</h2>
+        <p>Redirecting you in a moment...</p>
         <a href="${finalAuthUrl}" 
            style="display:inline-block; margin-top:20px; padding:20px 40px; background:#10b981; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">
-           START BROWSING
+           START BROWSING NOW
         </a>
+        <script>
+          // Auto-click for Safari CNA compatibility
+          setTimeout(() => { window.location.href = "${finalAuthUrl}"; }, 500);
+        </script>
       </body>
     </html>
   `);
