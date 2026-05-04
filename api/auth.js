@@ -27,8 +27,16 @@ export default async function handler(req, res) {
 
   // ✅ 3. IP आधारित control (MAIN LOGIC)
   if (ip) {
-    const sessionData = await redis.get(`paid:ip:${ip}`);
+    const sessionDataRaw = await redis.get(`paid:ip:${ip}`);
+let sessionData = null;
 
+try {
+  sessionData = typeof sessionDataRaw === "string"
+    ? JSON.parse(sessionDataRaw)
+    : sessionDataRaw;
+} catch {
+  sessionData = null;
+}
     // 🔥 Phase 6 logic (after payment)
     if (sessionData && sessionData.speed && sessionData.expiry) {
       const now = Date.now();
