@@ -33,11 +33,9 @@ function extractAuthBase(authaction) {
 
 function buildFinalAuthUrl({ authaction, tok, redir, downloadrate, uploadrate, sessiontimeout }) {
   const base = extractAuthBase(authaction);
-  // openNDS 9.8 reads these specific URL parameters
-  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}` +
-         `&downloadrate=${downloadrate || 0}` +
-         `&uploadrate=${uploadrate || 0}` +
-         `&sessiontimeout=${sessiontimeout || 0}`;
+  // We pack limits into 'custom' separated by commas
+  const custom = `${downloadrate},${uploadrate},${sessiontimeout}`;
+  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${custom}`;
 }
 
 export default async function handler(req, res) {
