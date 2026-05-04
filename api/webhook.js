@@ -60,14 +60,14 @@ export default async function handler(req, res) {
     // ✅ Store enhanced IP session (MAIN SOURCE)
     if (ip) {
       await redis.set(
-        `paid:ip:${ip}`,
-        {
-          sessionId,
-          speed: plan.speed,
-          expiry: expiryTs
-        },
-        { ex: plan.duration }
-      );
+  `paid:ip:${ip}`,
+  JSON.stringify({
+    sessionId,
+    speed: plan.speed,
+    expiry: expiryTs
+  }),
+  { ex: plan.duration }
+);
     }
 
     // ✅ Keep existing keys (for backward compatibility)
