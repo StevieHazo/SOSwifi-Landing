@@ -112,7 +112,10 @@ export default async function handler(req, res) {
       <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
       <body style="text-align:center; font-family:sans-serif; padding:50px 20px;">
         <h2 style="color:#2ecc71;">Payment Verified!</h2>
-        <p>Your 1-hour session is ready.</p>
+        <p>Your internet access is ready.</p>
+        <p style="font-size:0.9rem; color:#666;">
+        Your session will expire automatically based on your selected plan.
+        </p>
         <a href="${finalAuthUrl}" 
            style="display:inline-block; margin-top:20px; padding:20px 40px; background:#2ecc71; color:white; text-decoration:none; border-radius:10px; font-weight:bold; font-size:1.2rem;">
            START BROWSING
