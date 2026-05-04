@@ -13,7 +13,13 @@ export default async function handler(req, res) {
   if (sessionId) {
     const paid = await redis.get(`paid:session:${sessionId}`);
     if (paid === "paid") {
-      return res.status(200).json({ ok: true });
+      return res.status(200).json({
+        ok: true,
+        sessiontimeout: 300,
+        sessionlength: 300,
+        uploadrate: 1500,
+        downloadrate: 1500
+      });
     }
   }
 
@@ -21,7 +27,13 @@ export default async function handler(req, res) {
   if (mac) {
     const paid = await redis.get(`auth:mac:${mac}`);
     if (paid === "paid") {
-      return res.status(200).json({ ok: true });
+      return res.status(200).json({
+        ok: true,
+        sessiontimeout: 300,
+        sessionlength: 300,
+        uploadrate: 1500,
+        downloadrate: 1500
+      });
     }
   }
 
@@ -30,11 +42,12 @@ export default async function handler(req, res) {
     const linkedSession = await redis.get(`paid:ip:${ip}`);
     if (linkedSession) {
       return res.status(200).json({
-      ok: true,
-      sessiontimeout: 300,
-      uploadrate: 1500,
-      downloadrate: 1500
-});
+        ok: true,
+        sessiontimeout: 300,
+        sessionlength: 300,
+        uploadrate: 1500,
+        downloadrate: 1500
+      });
     }
   }
 
