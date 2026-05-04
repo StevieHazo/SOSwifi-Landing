@@ -34,8 +34,8 @@ function extractAuthBase(authaction) {
 function buildFinalAuthUrl({ authaction, tok, redir, downloadrate, uploadrate, sessiontimeout }) {
   const base = extractAuthBase(authaction);
   // We pack limits into 'custom' separated by commas
-  const custom = `${downloadrate},${uploadrate},${sessiontimeout}`;
-  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${custom}`;
+  const custom = `${sessiontimeout},${downloadrate},${uploadrate}`;
+return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${encodeURIComponent(custom)}`;
 }
 
 export default async function handler(req, res) {
@@ -132,7 +132,11 @@ export default async function handler(req, res) {
           document.getElementById('connectBtn').onclick = function() {
             const b = this.dataset;
             // We build the URL locally in the browser to satisfy iOS security
-            const finalUrl = b.base + "?tok=" + b.tok + "&redir=" + b.redir + "&custom=" + b.custom;
+            const finalUrl =
+              b.base +
+              "?tok=" + encodeURIComponent(b.tok) +
+              "&redir=" + encodeURIComponent(b.redir) +
+              "&custom=" + encodeURIComponent(b.custom);
             window.location.href = finalUrl;
           };
         </script>
