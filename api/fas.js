@@ -33,9 +33,19 @@ function extractAuthBase(authaction) {
 
 function buildFinalAuthUrl({ authaction, tok, redir, downloadrate, uploadrate, sessiontimeout }) {
   const base = extractAuthBase(authaction);
-  // We pack limits into 'custom' separated by commas
-  const custom = `${sessiontimeout},${downloadrate},${uploadrate}`;
-return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${encodeURIComponent(custom)}`;
+  
+  // openNDS v9.8 internal parameter names:
+  // sessionlength: minutes (NOT seconds)
+  // uploadrate: kb/s
+  // downloadrate: kb/s
+  
+  const minutes = Math.max(1, Math.floor(sessiontimeout / 60));
+
+  return `${base}?tok=${encodeURIComponent(tok)}` +
+         `&redir=${encodeURIComponent(redir)}` +
+         `&sessionlength=${minutes}` +
+         `&uploadrate=${uploadrate || 0}` +
+         `&downloadrate=${downloadrate || 0}`;
 }
 
 export default async function handler(req, res) {
@@ -104,42 +114,28 @@ export default async function handler(req, res) {
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (paidSession === "paid" || paidIP) {
-       const planRaw = await redis.get(`plan:ip:${clientip}`);
+       // Pull plan from Redis (or use defaults)
+  const planRaw = await redis.get(`plan:ip:${clientip}`);
   const plan = planRaw ? JSON.parse(planRaw) : { speed: 5000, expiry: Date.now() + 1200000 };
 
-  const timeout = Math.max(60, Math.floor((plan.expiry - Date.now()) / 1000));
   const drate = plan.speed;
-  const urate = plan.speed;
+  const timeout = Math.max(60, Math.floor((plan.expiry - Date.now()) / 1000));
+  
+  // Format: timeout,download,upload (comma-separated, NO spaces)
+  const customStr = `${timeout},${drate},${drate}`;
+  
+  // Construct the URL
+  const finalAuthUrl = `${extractAuthBase(authaction)}?tok=${tok}&redir=${encodeURIComponent(redir)}&custom=${customStr}`;
 
   res.setHeader("Content-Type", "text/html");
   return res.send(`
     <html>
-      <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-      <body style="text-align:center; padding:50px 20px; font-family:sans-serif;">
+      <body style="text-align:center; padding:50px 20px; font-family:sans-serif; background:#0f172a; color:white;">
         <h2>Payment Verified!</h2>
-        <p>Tap below to start your ${Math.floor(timeout/60)} min session.</p>
-        
-        <button id="connectBtn" 
-                data-base="${extractAuthBase(authaction)}"
-                data-tok="${tok}"
-                data-redir="${redir}"
-                data-custom="${timeout},${drate},${urate}"
-                style="display:inline-block; margin-top:20px; padding:20px 40px; background:#2ecc71; color:white; border:none; border-radius:10px; font-weight:bold; font-size:1.2rem; cursor:pointer;">
+        <a href="${finalAuthUrl}" 
+           style="display:inline-block; margin-top:20px; padding:20px 40px; background:#10b981; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">
            START BROWSING
-        </button>
-
-        <script>
-          document.getElementById('connectBtn').onclick = function() {
-            const b = this.dataset;
-            // We build the URL locally in the browser to satisfy iOS security
-            const finalUrl =
-              b.base +
-              "?tok=" + encodeURIComponent(b.tok) +
-              "&redir=" + encodeURIComponent(b.redir) +
-              "&custom=" + encodeURIComponent(b.custom);
-            window.location.href = finalUrl;
-          };
-        </script>
+        </a>
       </body>
     </html>
   `);
