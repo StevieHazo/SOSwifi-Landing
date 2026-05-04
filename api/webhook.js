@@ -11,11 +11,11 @@ const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
 function getPlan(priceId) {
   switch (priceId) {
     case "price_1TM8LkF9howUJR6PV4Ezswak":   // TODO replace with real ID
-      return { speed: 5000, duration: 1200 }; // 5 Mbps, 20 mins
+      return { speed: 5000, duration: 300 }; // 5 Mbps, 20 mins
     case "price_1TM8LkF9howUJR6PDVPAl0qe":  // TODO replace
-      return { speed: 15000, duration: 1200 };
+      return { speed: 15000, duration: 300 };
     case "price_1TM8LkF9howUJR6PlQUXWWkr":  // TODO replace
-      return { speed: 25000, duration: 1200 };
+      return { speed: 25000, duration: 300 };
     default:
       return null;
   }
