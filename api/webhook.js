@@ -41,6 +41,33 @@ export default async function handler(req, res) {
 
     if (ip) {
       await redis.set(`paid:ip:${ip}`, sessionId || "paid", { ex: 3600 });
+      const priceId = String(session.metadata?.priceId || "").trim();
+
+function getPlan(priceId) {
+  switch (priceId) {
+    case "price_1TM8LkF9howUJR6PV4Ezswak":   
+      return { speed: 5000, duration: 1200 };
+    case "price_1TM8LkF9howUJR6PDVPAl0qe":
+      return { speed: 15000, duration: 1200 };
+    case "price_1TM8LkF9howUJR6PlQUXWWkr":
+      return { speed: 25000, duration: 1200 };
+    default:
+      return null;
+  }
+}
+
+const plan = getPlan(priceId);
+
+if (plan && ip) {
+  await redis.set(
+    `plan:ip:${ip}`,
+    JSON.stringify({
+      speed: plan.speed,
+      expiry: Date.now() + plan.duration * 1000
+    }),
+    { ex: plan.duration }
+  );
+}
     }
 
     if (mac) {
