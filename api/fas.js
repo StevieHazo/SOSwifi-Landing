@@ -31,9 +31,13 @@ function extractAuthBase(authaction) {
   }
 }
 
-function buildFinalAuthUrl({ authaction, tok, redir }) {
+function buildFinalAuthUrl({ authaction, tok, redir, downloadrate, uploadrate, sessiontimeout }) {
   const base = extractAuthBase(authaction);
-  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=`;
+  // openNDS 9.8 reads these specific URL parameters
+  return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}` +
+         `&downloadrate=${downloadrate || 0}` +
+         `&uploadrate=${uploadrate || 0}` +
+         `&sessiontimeout=${sessiontimeout || 0}`;
 }
 
 export default async function handler(req, res) {
@@ -102,22 +106,38 @@ export default async function handler(req, res) {
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
 
     if (paidSession === "paid" || paidIP) {
-       const finalAuthUrl = buildFinalAuthUrl({ authaction, tok, redir });
+       // 1. Get the plan using the client IP
+  const planRaw = await redis.get(`plan:ip:${clientip}`);
+  let plan = planRaw ? JSON.parse(planRaw) : null;
+
+  // 2. Calculate limits (fallback to 5Mbps/5mins if plan missing)
+  const downloadrate = plan?.speed || 5000;
+  const uploadrate = plan?.speed || 5000;
+  let sessiontimeout = 300; 
+
+  if (plan?.expiry) {
+    sessiontimeout = Math.floor((plan.expiry - Date.now()) / 1000);
+  }
+  if (sessiontimeout <= 0) sessiontimeout = 60; // Safety floor
+
+  // 3. Build the URL with the new limits
+  const finalAuthUrl = buildFinalAuthUrl({ 
+    authaction, 
+    tok, 
+    redir,
+    downloadrate,
+    uploadrate,
+    sessiontimeout
+  });
 
   res.setHeader("Content-Type", "text/html");
-  res.setHeader("Cache-Control", "no-store");
-  
   return res.send(`
     <html>
-      <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-      <body style="text-align:center; font-family:sans-serif; padding:50px 20px;">
-        <h2 style="color:#2ecc71;">Payment Verified!</h2>
-        <p>Your 1-hour session is ready.</p>
-        <a href="${finalAuthUrl}" 
-           style="display:inline-block; margin-top:20px; padding:20px 40px; background:#2ecc71; color:white; text-decoration:none; border-radius:10px; font-weight:bold; font-size:1.2rem;">
+      <body style="text-align:center; padding:50px;">
+        <h2>Payment Verified!</h2>
+        <a href="${finalAuthUrl}" style="background:#2ecc71; color:white; padding:20px; text-decoration:none; border-radius:10px; font-weight:bold;">
            START BROWSING
         </a>
-        <p style="margin-top:30px; font-size:0.8rem; color:#666;">Clicking the button will activate your internet and close this window.</p>
       </body>
     </html>
   `);
