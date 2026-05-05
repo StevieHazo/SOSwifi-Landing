@@ -30,7 +30,7 @@ function extractAuthBase(authaction) {
     return safe(String(authaction).split("?")[0]);
   }
 }
-const plan = await redis.get(`plan:session:${sessionId}`) || "p1";
+
 function buildFinalAuthUrl({ authaction, tok, redir, custom}) {
 const base = extractAuthBase(authaction);
 return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${encodeURIComponent(custom)}`;
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
     if (!client) {
       return res.status(200).send("Invalid session");
     }
-
+   
     const clientip = safe(client.ip);
     const authaction = safe(client.authaction);
     const tok = safe(client.tok);
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
 
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
-
+    const plan = await redis.get(`plan:session:${sessionId}`) || "p1";
     if (paidSession === "paid" || paidIP) {
       const finalAuthUrl = buildFinalAuthUrl({
         authaction,
