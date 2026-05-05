@@ -30,8 +30,8 @@ function extractAuthBase(authaction) {
     return safe(String(authaction).split("?")[0]);
   }
 }
-
-function buildFinalAuthUrl({ authaction, tok, redir, custom = "p1" }) {
+const plan = await redis.get(`plan:session:${sessionId}`) || "p1";
+function buildFinalAuthUrl({ authaction, tok, redir, custom}) {
 const base = extractAuthBase(authaction);
 return `${base}?tok=${encodeURIComponent(tok)}&redir=${encodeURIComponent(redir)}&custom=${encodeURIComponent(custom)}`;
 }
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
         authaction,
         tok,
         redir,
-        custom: "p1"
+        custom: plan
       });
 
       res.setHeader("Content-Type", "text/html");
