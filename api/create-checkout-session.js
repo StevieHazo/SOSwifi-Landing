@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       mac: client.mac || ""
     };
 // 🔥 TEST MODE - skip Stripe
-await redis.set(`paid:session:${sessionId}`, "paid", { ex: 3600 });
+/*await redis.set(`paid:session:${sessionId}`, "paid", { ex: 3600 });
 
 if (client.ip) {
   await redis.set(`paid:ip:${client.ip}`, sessionId, { ex: 3600 });
@@ -38,7 +38,7 @@ if (client.ip) {
 
 return res.status(200).json({
   url: `${baseUrl}/success?session=${sessionId}`
-});
+});*/
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
