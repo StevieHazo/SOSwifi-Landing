@@ -1,0 +1,13 @@
+{
+  "background_color": "#ff6a1a",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "soswifi",
+  "orientation": "portrait",
+  "scope": "/pay.html, /success.html, package.json",
+  "short_name": "soswifi",
+  "start_url": "/index.html",
+  "theme_color": "#505050",
+  "description": "Your Internet Lifeline",
+  "lang": "en"
+}
