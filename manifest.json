@@ -1,13 +1,37 @@
 {
-  "background_color": "#ff6a1a",
-  "dir": "ltr",
+  "name": "SOS WiFi",
+  "short_name": "SOS WiFi",
+  "start_url": "/",
   "display": "standalone",
-  "name": "soswifi",
-  "orientation": "portrait",
-  "scope": "/pay.html, /success.html, package.json",
-  "short_name": "soswifi",
-  "start_url": "/index.html",
-  "theme_color": "#505050",
-  "description": "Your Internet Lifeline",
-  "lang": "en"
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/android/launchericon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/android/launchericon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/android/launchericon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/android/launchericon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android/launchericon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
