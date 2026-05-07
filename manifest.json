@@ -1,38 +1,62 @@
-{
-  "name": "SOS WiFi",
-  "short_name": "SOS WiFi",
-  "description": "Fast, reliable event WiFi with simple, secure access. SOS WiFi keeps you connected at festivals, events and remote locations.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
-  "icons": [
-    {
-      "src": "/android/launchericon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "/android/launchericon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "/android/launchericon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/android/launchericon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/android/launchericon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ]
-}
+const CACHE = "soswifi-v1";
+const OFFLINE_URL = "/offline.html";
+
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js");
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => {
+      return cache.addAll([
+        "/",
+        OFFLINE_URL
+      ]);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// ✅ Only cache site pages (NOT your API or checkout)
+workbox.routing.registerRoute(
+  ({ request }) => request.mode === "navigate",
+  new workbox.strategies.NetworkFirst({
+    cacheName: CACHE,
+    networkTimeoutSeconds: 3
+  })
+);
+
+// ✅ Cache static assets (images, css, js)
+workbox.routing.registerRoute(
+  ({ request }) =>
+    request.destination === "style" ||
+    request.destination === "script" ||
+    request.destination === "image",
+  new workbox.strategies.StaleWhileRevalidate({
+    cacheName: "assets"
+  })
+);
+
+// ✅ Fallback offline page
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          return await fetch(event.request);
+        } catch (err) {
+          const cache = await caches.open(CACHE);
+          return await cache.match(OFFLINE_URL);
+        }
+      })()
+    );
+  }
+});
