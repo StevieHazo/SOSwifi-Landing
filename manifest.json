@@ -1,6 +1,5 @@
 {
-  WiFi",
-  "short_name": "SOS WiFi",
+    "short_name": "SOS WiFi",
   "description": "Fast, reliable event WiFi with simple, secure access.",
   "start_url": "/",
   "display": "standalone",
