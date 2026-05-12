@@ -1,124 +1,152 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOS WiFi • Starlink at Festivals</title>
+  <title>SOS WiFi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'sos-orange': '#F57/div>            'sos-orange': '#F57C2A',
-
-      <!-- Gold -->
-      <div class="bg-zinc-900 rounded-3xl p-8 ring-2 ring-signal-blue relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-sos-orange text-black text-xs font-bold px-6 py-1 rounded-3xl">
-          MOST POPULAR
-        </div>
-
-        <div class="text-signal-blue font-medium">GOLD</div>
-        <div class="text-6xl font-bold mt-2">£10</div>
-        <div class="text-zinc-400">15 Mbps • 20 minutes</div>
-
-        <ul class="mt-8 space-y-3 text-sm">
-          <li>✅ Streaming & video calls</li>
-          <li>✅ YouTube, live streams</li>
-          <li>✅ Multiple devices</li>
-        </ul>
-
-        YOUR_GOLD_STRIPE_LINK
-          Pay £10 now
-        </a>
-      </div>
-
-      <!-- Deluxe -->
-      <div class="bg-zinc-900 rounded-3xl p-8">
-        <div class="text-signal-blue font-medium">DELUXE</div>
-        <div class="text-6xl font-bold mt-2">£20</div>
-        <div class="text-zinc-400">25 Mbps • 20 minutes</div>
-
-        <ul class="mt-8 space-y-3 text-sm">
-          <li>✅ Ultra‑fast 4K & uploads</li>
-          <li>✅ Best for busy events</li>
-        </ul>
-
-        YOUR_DELUXE_STRIPE_LINK
-          Pay £20 now
-        </a>
-      </div>
-
-    </div>
-
-    <!-- Token entry -->
-    <div class="mt-12 text-center">
-      <p class="text-zinc-400 mb-4">Already paid? Enter your token below</p>
-
-      http://192.168.8.1:2050/auth
-
-        <input type="text" name="tok" placeholder="Enter token here"
-               class="flex-1 bg-zinc-900 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none">
-
-        <button type="submit"
-                class="bg-signal-blue text-black px-8 font-semibold rounded-2xl hover:bg-sos-orange">
-          Connect
-        </button>
-      </form>
-    </div>
-
-    <p class="text-center text-xs text-zinc-500 mt-12">
-      © SOS WiFi • Powered by Starlink on GL.iNet AXT1800
-    </p>
-
-  </div>
-</body>
-</html>
-            'signal-blue': '#1FA3E0',
-          }
-        }
-      }
-    }
-  </script>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      align-items: centre;
+      justify-content: centre;
+      text-align: centre;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .tagline {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .sub {
+      font-size: 15px;
+      opacity: 0.7;
+      margin-bottom: 30px;
+    }
+
+    .price-card {
+      background: #111;
+      border-radius: 20px;
+      padding: 30px 20px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .price {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .duration {
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 20px;
+    }
+
+    .features {
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.7;
+    }
+
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      background: #00f2ff;
+      color: #000;
+      font-weight: 700;
+      font-size: 18px;
+      border-radius: 12px;
+      text-decoration: none;
+      margin-top: 20px;
+      transition: 0.2s ease;
+    }
+
+    .cta:hover {
+      background: #00d4e0;
+    }
+
+    .payment {
+      font-size: 13px;
+      opacity: 0.6;
+      margin-top: 15px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 11px;
+      opacity: 0.4;
+    }
+
   </style>
 </head>
 
-<body class="bg-zinc-950 text-white min-h-screen">
+<body>
 
-  <div class="max-w-4xl mx-auto px-6 py-12">
+  <div class="container">
 
-    <!-- Header -->
-    <div class="flex items-center gap-3 justify-center mb-8">
-      <i class="fa-solid fa-wifi text-4xl text-signal-blue"></i>
-      <h1 class="text-4xl font-bold">SOS WiFi</h1>
+    <div class="logo">SOS WiFi</div>
+
+    <div class="tagline">
+      No signal?<br>Get online instantly
     </div>
 
-    <!-- Hero -->
-    <div class="text-center mb-10">
-      <div class="inline-flex bg-sos-orange text-black px-5 py-2 rounded-3xl text-sm font-bold mb-4">
-        POWERED BY STARLINK
+    <div class="sub">
+      Fast WiFi. No signup. Works in seconds.
+    </div>
+
+    <div class="price-card">
+      <div class="price">£10</div>
+      <div class="duration">20 minutes access</div>
+
+      <div class="features">
+        ✔ Instant connection<br>
+        ✔ Reliable performance<br>
+        ✔ Secure network
       </div>
-
-      <h2 class="text-5xl font-bold tracking-tighter">20 minutes of fast WiFi</h2>
-      <p class="text-zinc-400 mt-3">When cellular is dead at festivals &amp; events</p>
     </div>
 
-    <!-- Packages -->
-    <div class="grid md:grid-cols-3 gap-6">
+    <a href="#" class="cta">
+      CONNECT NOW
+    </a>
 
-      <!-- Economy -->
-      <div class="bg-zinc-900 rounded-3xl p-8">
-        <div class="text-signal-blue font-medium">ECONOMY</div>
-        <div class="text-6xl font-bold mt-2">£5</div>
-        <div class="text-zinc-400">5 Mbps • 20 minutes</div>
+    <div class="payment">
+      Apple Pay • Card • Secure Checkout
+    </div>
 
-        <ul class="mt-8 space-y-3 text-sm">
-          <li>✅ Browsing & social media</li>
-          <li>✅ WhatsApp, Instagram, TikTok</li>
-        </ul>
+    <div class="footer">
+      By connecting you agree to our Terms & Privacy Policy
+    </div>
 
+  </div>
+
+</body>
+</html>
