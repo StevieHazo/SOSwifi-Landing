@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Continue Payment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-md w-full px-6 py-10 bg-zinc-800/80 rounded-3xl text-center shadow-xl border border-orange-500/30">
+    <h1 class="text-2xl font-bold mb-4 text-orange-400">Continue to Payment</h1>
+    <p class="text-zinc-400 mb-8 text-sm">Tap below to open the secure Stripe payment page.</p>
+
+    <button
+      id="payBtn"
+      type="button"
+      class="block w-full py-4 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500 text-white font-semibold rounded-2xl transition-all active:scale-[0.97]"
+    >
+      Continue to Pay • Secure
+    </button>
+
+    <a
+      id="fallbackLink"
+      href="#"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden mt-4 block text-sm text-orange-300 underline underline-offset-4"
+    >
+      Open payment page manually
+    </a>
+
+    <p id="msg" class="text-xs text-zinc-500 mt-6">Secure checkout powered by Stripe</p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const session = (params.get("session") || "").trim();
+    const plan = (params.get("plan") || "").trim();
+
+    const priceMap = {
+      basic: "price_1TM8LkF9howUJR6PV4Ezswak",
+      standard: "price_1TM8LkF9howUJR6PDVPAl0qe",
+      deluxe: "price_1TM8LkF9howUJR6PlQUXWWkr"
+    };
+
+    const priceId = priceMap[plan];
+    const payBtn = document.getElementById("payBtn");
+    const fallbackLink = document.getElementById("fallbackLink");
+    const msg = document.getElementById("msg");
+
+    function setError(text) {
+      payBtn.disabled = true;
+      payBtn.classList.add("opacity-60", "cursor-not-allowed");
+      msg.textContent = text;
+    }
+
+    async function openCheckout() {
+      if (!plan || !priceId) {
+        setError("Invalid plan.");
+        return;
+      }
+
+      if (!session) {
+        setError("Missing session in URL.");
+        return;
+      }
+
+      payBtn.disabled = true;
+      payBtn.textContent = "Preparing secure payment page...";
+      msg.textContent = "Please wait.";
+
+      try {
+        const apiUrl = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: { "Accept": "application/json" }
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.error || "Could not create checkout session");
+        }
+
+        if (!data.url) {
+          throw new Error("Stripe did not return a checkout URL");
+        }
+
+        fallbackLink.href = data.url;
+        fallbackLink.classList.remove("hidden");
+        msg.textContent = "If the page doesn't open automatically, use the manual link below.";
+
+        const popup = window.open(data.url, "_blank", "noopener,noreferrer");
+        if (!popup) {
+          window.location.href = data.url;
+          return;
+        }
+
+        payBtn.disabled = false;
+        payBtn.textContent = "Open Payment Page Again";
+      } catch (err) {
+        payBtn.disabled = false;
+        payBtn.textContent = "Continue to Pay • Secure";
+        msg.textContent = err?.message || "Unable to open payment page.";
+        fallbackLink.classList.add("hidden");
+      }
+    }
+
+    if (!plan || !priceId) {
+      setError("Invalid plan.");
+    } else if (!session) {
+      setError("Missing session in URL.");
+    } else {
+      payBtn.addEventListener("click", openCheckout);
+    }
+  </script>
+</body>
+</html>

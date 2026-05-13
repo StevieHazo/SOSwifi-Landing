@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline • SOS WiFi</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(ellipse at center, #2c343d 0%, #232a31 45%, #1a2027 75%, #11171e 100%);
+      color: white;
+      text-align: centre;
+      display: flex;
+      align-items: centre;
+      justify-content: centre;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .logo-container {
+      border: 3px solid #FF6A1A;
+      border-radius: 28px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 30px rgba(255, 106, 26, 0.3);
+    }
+
+    .logo {
+      font-size: 60px;
+      font-weight: bold;
+      letter-spacing: -5px;
+      color: #FF6A1A;
+    }
+
+    .wifi {
+      font-size: 24px;
+      letter-spacing: 6px;
+      margin-top: -10px;
+    }
+
+    .status {
+      font-size: 22px;
+      font-weight: bold;
+      color: #FF6A1A;
+      margin-bottom: 10px;
+    }
+
+    .message {
+      color: #ccc;
+      margin-bottom: 25px;
+    }
+
+    .retry {
+      display: inline-block;
+      padding: 14px 20px;
+      border: 2px solid #FF6A1A;
+      border-radius: 16px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .retry:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="logo-container">
+      <div class="logo">S🛟S</div>
+      <div class="wifi">WI-FI</div>
+    </div>
+
+    <div class="status">Connection lost</div>
+
+    <div class="message">
+      You’re currently offline.<br><br>
+      Reconnect to SOS WiFi or mobile data to continue and complete your session.
+    </div>
+
+    <a href="/" class="retry">Try again</a>
+
+  </div>
+</body>
+</html>

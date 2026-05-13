@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, initial-scale=1.0">
+  <title>SOS WiFi Screenshot</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      width: 1080px;
+      height: 1920px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #2c343d 0%, #232a31 45%, #1a2027 75%, #11171e 100%);
+      font-family: 'Inter', sans-serif;
+      color: white;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 120px;
+      text-align: center;
+      font-size: 40px;
+      font-weight: 600;
+      color: #FF6A1A;
+      letter-spacing: 3px;
+    }
+
+    .card {
+      border: 2px solid #FF6A1A;
+      border-radius: 32px;
+      padding: 60px 40px;
+      background: rgba(24,24,27,0.95);
+      width: 75%;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 106, 26, 0.25);
+    }
+
+    .logo {
+      font-size: 90px;
+      font-weight: bold;
+      color: #FF6A1A;
+      margin-bottom: 10px;
+    }
+
+    .wifi {
+      font-size: 36px;
+      letter-spacing: 8px;
+      margin-bottom: 30px;
+    }
+
+    .price {
+      font-size: 110px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      color: #FBBF24;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .features {
+      text-align: left;
+      margin: 40px auto;
+      max-width: 400px;
+      font-size: 22px;
+      color: #d4d4d8;
+    }
+
+    .cta {
+      margin-top: 40px;
+      padding: 22px;
+      border: 2px solid #FF6A1A;
+      border-radius: 20px;
+      font-size: 26px;
+      font-weight: 600;
+      background: rgba(255, 106, 26, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ Overlay text -->
+  <div class="overlay">Fast WiFi at Events</div>
+
+  <div class="card">
+
+    <div class="logo">S🛟S</div>
+    <div class="wifi">WI-FI</div>
+
+    <div class="tag">MOST POPULAR</div>
+
+    <div class="text-amber-300">GOLD</div>
+    <div class="price">£10</div>
+    <div class="text-zinc-400 text-xl">15 Mbps • 20 minutes</div>
+
+    <div class="features">
+      <div>✔ Streaming & video calls</div>
+      <div>✔ YouTube & live streams</div>
+      <div>✔ Multiple devices</div>
+    </div>
+
+    <div class="cta">🔒 Pay £10 now • Secure</div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOS WiFi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      align-items: centre;
+      justify-content: centre;
+      text-align: centre;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .tagline {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .sub {
+      font-size: 15px;
+      opacity: 0.7;
+      margin-bottom: 30px;
+    }
+
+    .price-card {
+      background: #111;
+      border-radius: 20px;
+      padding: 30px 20px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .price {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .duration {
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 20px;
+    }
+
+    .features {
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.7;
+    }
+
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      background: #00f2ff;
+      color: #000;
+      font-weight: 700;
+      font-size: 18px;
+      border-radius: 12px;
+      text-decoration: none;
+      margin-top: 20px;
+      transition: 0.2s ease;
+    }
+
+    .cta:hover {
+      background: #00d4e0;
+    }
+
+    .payment {
+      font-size: 13px;
+      opacity: 0.6;
+      margin-top: 15px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 11px;
+      opacity: 0.4;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo">SOS WiFi</div>
+
+    <div class="tagline">
+      No signal?<br>Get online instantly
+    </div>
+
+    <div class="sub">
+      Fast WiFi. No signup. Works in seconds.
+    </div>
+
+    <div class="price-card">
+      <div class="price">£10</div>
+      <div class="duration">20 minutes access</div>
+
+      <div class="features">
+        ✔ Instant connection<br>
+        ✔ Reliable performance<br>
+        ✔ Secure network
+      </div>
+    </div>
+
+    <a href="#" class="cta">
+      CONNECT NOW
+    </a>
+
+    <div class="payment">
+      Apple Pay • Card • Secure Checkout
+    </div>
+
+    <div class="footer">
+      By connecting you agree to our Terms & Privacy Policy
+    </div>
+
+  </div>
+
+</body>
+</html>
