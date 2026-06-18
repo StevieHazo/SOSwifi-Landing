@@ -48,6 +48,7 @@ export default async function handler(req, res) {
     }
 
     let sessionId = safe(req.query.session);
+    const requestedPlan = safe(req.query.plan);
 
     // First hit from openNDS
     if (!sessionId) {
@@ -85,6 +86,9 @@ export default async function handler(req, res) {
 
     // Return after payment / later revisit
     const client = await redis.get(`client:${sessionId}`);
+    if (requestedPlan === "p4") {
+  await redis.set(`plan:session:${sessionId}`, "p4", { ex: 3600 });
+}
     if (!client) {
       return res.status(200).send("Invalid session");
     }
@@ -101,7 +105,7 @@ export default async function handler(req, res) {
     const paidSession = await redis.get(`paid:session:${sessionId}`);
     const paidIP = clientip ? await redis.get(`paid:ip:${clientip}`) : null;
     const plan = await redis.get(`plan:session:${sessionId}`) || "p1";
-    if (paidSession === "paid" || paidIP) {
+    if (requestedPlan === "p4" || paidSession === "paid" || paidIP) {
       const finalAuthUrl = buildFinalAuthUrl({
         authaction,
         tok,
