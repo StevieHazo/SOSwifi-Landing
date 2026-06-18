@@ -36,7 +36,7 @@
     const params = new URLSearchParams(window.location.search);
     const session = (params.get("session") || "").trim();
     const plan = (params.get("plan") || "").trim();
-
+    const eventMode = params.get("event") || "cheap";
     const priceMap = {
       basic: "price_1TM8LkF9howUJR6PV4Ezswak",
       standard: "price_1TM8LkF9howUJR6PDVPAl0qe",
@@ -68,9 +68,9 @@
       payBtn.disabled = true;
       payBtn.textContent = "Preparing secure payment page...";
       msg.textContent = "Please wait.";
-
+      
       try {
-        const apiUrl = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}`;
+        const apiUrl = `/api/checkout?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}&event=${encodeURIComponent(eventMode)}`;
         const response = await fetch(apiUrl, {
           method: "GET",
           headers: { "Accept": "application/json" }
