@@ -16,6 +16,8 @@ export default async function handler(req, res) {
   "price_1TM8LkF9howUJR6PV4Ezswak": "p1",
   "price_1TM8LkF9howUJR6PDVPAl0qe": "p2",
   "price_1TM8LkF9howUJR6PlQUXWWkr": "p3"
+  "price_1TM8LkF9howUJR6PV4Ezswak": "p5",
+  "price_1TM8LkF9howUJR6PDVPAl0qe": "p6",
 };
 
 const plan = PLAN_MAP[priceId] || "p1";
