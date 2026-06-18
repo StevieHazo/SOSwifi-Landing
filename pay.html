@@ -70,7 +70,7 @@
       msg.textContent = "Please wait.";
       
       try {
-        const apiUrl = `/api/checkout?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}&event=${encodeURIComponent(eventMode)}`;
+        const apiUrl = `/api/create-checkout-session?priceId=${encodeURIComponent(priceId)}&session=${encodeURIComponent(session)}&event=${encodeURIComponent(eventMode)}`;
         const response = await fetch(apiUrl, {
           method: "GET",
           headers: { "Accept": "application/json" }
