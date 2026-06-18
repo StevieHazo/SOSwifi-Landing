@@ -1,0 +1,13 @@
+<script>
+const params = new URLSearchParams(window.location.search);
+
+const session = params.get("session");
+const plan = params.get("plan") || "p4";
+
+if (!session) {
+  document.body.innerHTML = "Missing session";
+} else {
+  window.location.href =
+    `/api/free?session=${encodeURIComponent(session)}&plan=${encodeURIComponent(plan)}`;
+}
+</script>
