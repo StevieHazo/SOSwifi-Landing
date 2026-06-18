@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const input = req.method === "GET" ? req.query : req.body;
 
     const priceId = safe(input.priceId);
-    const eventMode = safe(input.event) || "cheap";
+    const eventMode = params.get("event") || "normal";
     if (eventMode === "cheap") {
     const PLAN_MAP = {
   "price_1TM8LkF9howUJR6PV4Ezswak": "p5",
